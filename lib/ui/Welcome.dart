@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import '../store/store.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -19,6 +20,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void initState() {
     super.initState();
+    _checkFirstLaunch();
 
     // Continuous pulsing glow on the logo
     _pulseCtrl = AnimationController(
@@ -49,6 +51,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     _pulseCtrl.dispose();
     _entryCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkFirstLaunch() async {
+    try {
+      final url = await MimaStore.instance.getSetting('server_url');
+      if (url != null && mounted) {
+        Navigator.pushReplacementNamed(context, '/main');
+      }
+    } catch (e) {
+      // Ignore DB errors on startup
+    }
   }
 
   @override

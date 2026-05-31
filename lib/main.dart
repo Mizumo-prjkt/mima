@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, exit, File;
 import 'package:window_manager/window_manager.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'store/store.dart';
 
 import 'ui/Welcome.dart';
 import 'ui/Setup.dart';
@@ -15,8 +18,11 @@ import 'ui/ModelManager.dart';
 import 'ui/About.dart';
 import 'widgets/TitleBar.dart';
 
-void main() async {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (args.isNotEmpty) {
+    await _handleCommandLineArgs(args);
+  }
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -47,6 +53,53 @@ void main() async {
 }
 
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
+
+Future<void> _handleCommandLineArgs(List<String> args) async {
+  bool handled = false;
+
+  if (args.contains('--reset-all')) {
+    // Delete database file in support directory
+    try {
+      final supportDir = await getApplicationSupportDirectory();
+      final supportFile = File(p.join(supportDir.path, 'mima.db'));
+      if (await supportFile.exists()) {
+        await supportFile.delete();
+      }
+    } catch (_) {}
+
+    // Delete database file in documents directory
+    try {
+      final docsDir = await getApplicationDocumentsDirectory();
+      final docsFile = File(p.join(docsDir.path, 'mima.db'));
+      if (await docsFile.exists()) {
+        await docsFile.delete();
+      }
+    } catch (_) {}
+
+    print('[Mima] Purged all database and settings files.');
+    handled = true;
+  } else if (args.contains('--reset-app')) {
+    try {
+      await MimaStore.instance.clearAppSettings();
+      print('[Mima] Cleared all app settings.');
+    } catch (e) {
+      print('[Mima] Failed to clear app settings: $e');
+    }
+    handled = true;
+  } else if (args.contains('--reset-db')) {
+    try {
+      await MimaStore.instance.clearChatDatabase();
+      print('[Mima] Cleared all chat sessions and messages.');
+    } catch (e) {
+      print('[Mima] Failed to clear chat database: $e');
+    }
+    handled = true;
+  }
+
+  if (handled) {
+    exit(0);
+  }
+}
 
 class MimaApp extends StatelessWidget {
   const MimaApp({super.key});

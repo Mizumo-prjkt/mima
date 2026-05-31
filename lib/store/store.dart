@@ -115,6 +115,15 @@ class MimaStore {
     await db.delete(db.chatSessions).go();
     await db.delete(db.appSettings).go();
   }
+
+  Future<void> clearAppSettings() async {
+    await db.delete(db.appSettings).go();
+  }
+
+  Future<void> clearChatDatabase() async {
+    await db.delete(db.chatMessages).go();
+    await db.delete(db.chatSessions).go();
+  }
 }
 
 class ChatWithLastMessage {
