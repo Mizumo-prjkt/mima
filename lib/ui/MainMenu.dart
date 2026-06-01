@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'Chat.dart';
 import '../store/store.dart';
-import '../store/drift.dart';
 
 // =============================================================================
 // MainMenuScreen — adaptive layout: sidebar+content on wide, list on narrow

@@ -1066,56 +1066,6 @@ class _MessageBubble extends StatelessWidget {
 }
 
 // =============================================================================
-// Attachment chip shown inside a message bubble
-// =============================================================================
-
-class _AttachmentChip extends StatelessWidget {
-  final String fileName;
-  final bool isUser;
-  const _AttachmentChip({required this.fileName, required this.isUser});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: isUser
-            ? colors.onPrimary.withOpacity(0.12)
-            : colors.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.description_rounded,
-            size: 16,
-            color: isUser
-                ? colors.onPrimary.withOpacity(0.7)
-                : colors.onSurface.withOpacity(0.5),
-          ),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              fileName,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
-                color: isUser
-                    ? colors.onPrimary.withOpacity(0.8)
-                    : colors.onSurface.withOpacity(0.6),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// =============================================================================
 // Typing indicator (3 animated dots)
 // =============================================================================
 

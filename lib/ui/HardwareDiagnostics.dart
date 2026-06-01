@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart' as ollama;
 import '../ollama/ollama_dart.dart';
-import '../main.dart';
 
 // =============================================================================
 // HardwareDiagnosticsScreen — Probes Ollama server capabilities and
@@ -515,7 +514,6 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
 
   Widget _buildModelRow(ollama.ModelSummary model) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final name = model.name ?? 'unknown';
     final details = model.details;
     final paramSize = details?.parameterSize ?? '—';
