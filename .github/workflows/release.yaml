@@ -48,6 +48,9 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Download Package Deps
+        run: flutter pub get
+
       - name: 🔍 Static Analysis
         run: dart analyze
 
