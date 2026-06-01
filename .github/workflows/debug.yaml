@@ -1,0 +1,89 @@
+name: Build Debug
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: 🎯 Set environment variables
+        run: |
+          tag=$(git tag --points-at HEAD 2>/dev/null || echo "v1.0.0-alpha.1")
+          commit=$(git rev-parse --short HEAD)
+          timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+          echo "commit_hash=$commit" >> $GITHUB_ENV
+          echo "tag=$tag" >> $GITHUB_ENV
+          echo "timestamp=$timestamp" >> $GITHUB_ENV
+
+      - name: 🔧 Configure Linux Build Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang ninja-build pkg-config libpulse-dev libnss3-dev libxkbcommon-dev libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-tools gstreamer1.0-libav
+
+      - name: Check GStreamer if Present
+        run: |
+          gst-inspect-1.0 --version
+          ls -l /usr/lib/x86_64-linux-gnu/gstreamer-1.0/
+
+      - name: 🏗️ Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: 'stable'
+
+      - name: 🔍 Static Analysis
+        run: dart analyze
+
+      - name: 🧪 Run Tests
+        run: flutter test --no-pub
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🧹 Remove local-only gradle.properties settings
+        run: |
+          if [ -f android/gradle.properties ]; then
+            sed -i '/org.gradle.java.home/d' android/gradle.properties
+          fi
+
+      - name: 📋 View Git Information
+        run: |
+          echo "=== GIT INFO ==="
+          git log -1 --pretty=fuller
+          echo "================"
+
+      - name: Build Debug (Linux)
+        continue-on-error: true
+        run: ./build.sh linux debug
+
+      - name: Build Debug (APK)
+        continue-on-error: true
+        run: ./build.sh android debug
+
+      - name: Package ZIP (Linux)
+        continue-on-error: true
+        run: zip -r mima_linux-${{ env.commit_hash }}.zip build/linux/x64/debug/bundle 2>/dev/null || true
+
+      - name: Package APK (Android)
+        continue-on-error: true
+        run: zip -r mima_android-${{ env.commit_hash }}.apk.zip build/app/outputs/flutter-apk/app-debug.apk 2>/dev/null || true
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: mima-debug
+          path: |
+            mima_linux-${{ env.commit_hash }}.zip
+            mima_android-${{ env.commit_hash }}.apk.zip

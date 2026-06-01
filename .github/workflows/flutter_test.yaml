@@ -1,0 +1,41 @@
+name: Flutter Tests
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: 🏗️ Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: 'stable'
+
+      - name: 🔍 Static Analysis
+        run: dart analyze
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Checkout code
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - name: 🏗️ Install Flutter
+        uses: subosito/flutter-action@60e0abe73a8f0889a0032dc52ad278d53d762228
+        with:
+          channel: 'stable'
+
+      - name: 🧪 Run Tests
+        run: flutter test --no-pub
