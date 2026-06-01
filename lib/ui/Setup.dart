@@ -12,7 +12,9 @@ class SetupScreen extends StatefulWidget {
 
 class _SetupScreenState extends State<SetupScreen>
     with SingleTickerProviderStateMixin {
-  final _urlController = TextEditingController(text: OllamaService.defaultServerUrl);
+  final _urlController = TextEditingController(
+    text: OllamaService.defaultServerUrl,
+  );
   bool _isTesting = false;
   _ConnectionStatus _status = _ConnectionStatus.idle;
 
@@ -79,7 +81,9 @@ class _SetupScreenState extends State<SetupScreen>
             ),
             child: FadeTransition(
               opacity: CurvedAnimation(
-                  parent: _entryCtrl, curve: Curves.easeOut),
+                parent: _entryCtrl,
+                curve: Curves.easeOut,
+              ),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 520),
                 child: Column(
@@ -89,8 +93,10 @@ class _SetupScreenState extends State<SetupScreen>
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () =>
-                              Navigator.pushReplacementNamed(context, '/welcome'),
+                          onPressed: () => Navigator.pushReplacementNamed(
+                            context,
+                            '/welcome',
+                          ),
                           icon: const Icon(Icons.arrow_back_rounded),
                           style: IconButton.styleFrom(
                             backgroundColor: colors.surfaceContainer,
@@ -103,9 +109,15 @@ class _SetupScreenState extends State<SetupScreen>
                             final isDark = currentMode == ThemeMode.dark;
                             return IconButton(
                               onPressed: () {
-                                themeNotifier.value = isDark ? ThemeMode.light : ThemeMode.dark;
+                                themeNotifier.value = isDark
+                                    ? ThemeMode.light
+                                    : ThemeMode.dark;
                               },
-                              icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
+                              icon: Icon(
+                                isDark
+                                    ? Icons.light_mode_rounded
+                                    : Icons.dark_mode_rounded,
+                              ),
                               style: IconButton.styleFrom(
                                 backgroundColor: colors.surfaceContainer,
                               ),
@@ -122,24 +134,31 @@ class _SetupScreenState extends State<SetupScreen>
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: colors.primary.withOpacity(0.12),
+                            color: colors.primary.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(14),
                           ),
-                          child: Icon(Icons.link_rounded,
-                              color: colors.primary, size: 28),
+                          child: Icon(
+                            Icons.link_rounded,
+                            color: colors.primary,
+                            size: 28,
+                          ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Connect to Ollama',
-                                  style: theme.textTheme.headlineSmall),
+                              Text(
+                                'Connect to Ollama',
+                                style: theme.textTheme.headlineSmall,
+                              ),
                               const SizedBox(height: 4),
                               Text(
                                 'Enter your Ollama server address',
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: colors.onSurface.withOpacity(0.6),
+                                  color: colors.onSurface.withValues(
+                                    alpha: 0.6,
+                                  ),
                                 ),
                               ),
                             ],
@@ -159,22 +178,25 @@ class _SetupScreenState extends State<SetupScreen>
                             Text(
                               'Server URL',
                               style: theme.textTheme.labelLarge?.copyWith(
-                                color: colors.onSurface.withOpacity(0.7),
+                                color: colors.onSurface.withValues(alpha: 0.7),
                               ),
                             ),
                             const SizedBox(height: 10),
                             TextField(
                               controller: _urlController,
                               decoration: InputDecoration(
-                                prefixIcon:
-                                    const Icon(Icons.dns_rounded, size: 20),
+                                prefixIcon: const Icon(
+                                  Icons.dns_rounded,
+                                  size: 20,
+                                ),
                                 hintText: 'http://your-server:11434',
                                 suffixIcon: _buildStatusIcon(),
                               ),
                               onChanged: (_) {
                                 if (_status != _ConnectionStatus.idle) {
                                   setState(
-                                      () => _status = _ConnectionStatus.idle);
+                                    () => _status = _ConnectionStatus.idle,
+                                  );
                                 }
                               },
                             ),
@@ -182,7 +204,7 @@ class _SetupScreenState extends State<SetupScreen>
                             Text(
                               'Make sure Ollama is running on this address',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: colors.onSurface.withOpacity(0.4),
+                                color: colors.onSurface.withValues(alpha: 0.4),
                               ),
                             ),
                             const SizedBox(height: 20),
@@ -191,8 +213,7 @@ class _SetupScreenState extends State<SetupScreen>
                             SizedBox(
                               width: double.infinity,
                               child: OutlinedButton.icon(
-                                onPressed:
-                                    _isTesting ? null : _testConnection,
+                                onPressed: _isTesting ? null : _testConnection,
                                 icon: _isTesting
                                     ? SizedBox(
                                         width: 18,
@@ -220,9 +241,11 @@ class _SetupScreenState extends State<SetupScreen>
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.info_outline_rounded,
-                                color: colors.onSurface.withOpacity(0.5),
-                                size: 20),
+                            Icon(
+                              Icons.info_outline_rounded,
+                              color: colors.onSurface.withValues(alpha: 0.5),
+                              size: 20,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -232,7 +255,9 @@ class _SetupScreenState extends State<SetupScreen>
                                 'LAN IP instead of localhost.\n'
                                 'For Android Emulators, use 10.0.2.2 as the host.',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colors.onSurface.withOpacity(0.5),
+                                  color: colors.onSurface.withValues(
+                                    alpha: 0.5,
+                                  ),
                                   height: 1.5,
                                 ),
                               ),
@@ -271,11 +296,15 @@ class _SetupScreenState extends State<SetupScreen>
   Widget? _buildStatusIcon() {
     switch (_status) {
       case _ConnectionStatus.success:
-        return const Icon(Icons.check_circle_rounded,
-            color: Colors.greenAccent);
+        return const Icon(
+          Icons.check_circle_rounded,
+          color: Colors.greenAccent,
+        );
       case _ConnectionStatus.error:
-        return Icon(Icons.error_rounded,
-            color: Theme.of(context).colorScheme.error);
+        return Icon(
+          Icons.error_rounded,
+          color: Theme.of(context).colorScheme.error,
+        );
       default:
         return null;
     }

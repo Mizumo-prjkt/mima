@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart' as ollama;
@@ -122,7 +124,9 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
                   color: colors.primaryContainer.withValues(alpha: 0.15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: colors.primary.withValues(alpha: 0.2)),
+                    side: BorderSide(
+                      color: colors.primary.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -157,7 +161,10 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide.none,
                                   ),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
                                 ),
                               ),
                             ),
@@ -169,14 +176,21 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
                                   _downloadModel(tag);
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Please enter a valid model tag')),
+                                    const SnackBar(
+                                      content: Text(
+                                        'Please enter a valid model tag',
+                                      ),
+                                    ),
                                   );
                                 }
                               },
                               icon: const Icon(Icons.download_rounded),
                               label: const Text('Pull'),
                               style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 14,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -191,7 +205,10 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
 
                 // Search bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: TextField(
                     controller: _searchController,
                     onChanged: _onSearchChanged,
@@ -218,9 +235,7 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
                 ),
 
                 // Content
-                Expanded(
-                  child: _buildContent(theme, colors),
-                ),
+                Expanded(child: _buildContent(theme, colors)),
               ],
             ),
           ),
@@ -241,7 +256,11 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.search_off_rounded, size: 48, color: colors.onSurface.withValues(alpha: 0.3)),
+              Icon(
+                Icons.search_off_rounded,
+                size: 48,
+                color: colors.onSurface.withValues(alpha: 0.3),
+              ),
               const SizedBox(height: 16),
               Text(
                 'No models found for "$_searchQuery"',
@@ -256,7 +275,8 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
       return ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: _searchResults.length,
-        itemBuilder: (ctx, i) => _buildSearchResultCard(_searchResults[i], theme, colors),
+        itemBuilder: (ctx, i) =>
+            _buildSearchResultCard(_searchResults[i], theme, colors),
       );
     }
 
@@ -266,7 +286,11 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off_rounded, size: 48, color: colors.onSurface.withValues(alpha: 0.3)),
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 48,
+              color: colors.onSurface.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 16),
             Text(
               'Could not load model library',
@@ -307,7 +331,11 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
     );
   }
 
-  Widget _buildSearchResultCard(LibrarySearchResult model, ThemeData theme, ColorScheme colors) {
+  Widget _buildSearchResultCard(
+    LibrarySearchResult model,
+    ThemeData theme,
+    ColorScheme colors,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
@@ -320,15 +348,25 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.smart_toy_outlined, color: colors.primary, size: 22),
+                  Icon(
+                    Icons.smart_toy_outlined,
+                    color: colors.primary,
+                    size: 22,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       model.name,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: colors.onSurface.withValues(alpha: 0.3)),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: colors.onSurface.withValues(alpha: 0.3),
+                  ),
                 ],
               ),
               if (model.description.isNotEmpty) ...[
@@ -347,8 +385,12 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
                 spacing: 6,
                 runSpacing: 6,
                 children: [
-                  ...model.capabilities.map((cap) => _CapabilityChip(label: cap, colors: colors)),
-                  ...model.sizes.map((size) => _SizeChip(label: size, colors: colors)),
+                  ...model.capabilities.map(
+                    (cap) => _CapabilityChip(label: cap, colors: colors),
+                  ),
+                  ...model.sizes.map(
+                    (size) => _SizeChip(label: size, colors: colors),
+                  ),
                 ],
               ),
               if (model.pullCount.isNotEmpty || model.updatedAt.isNotEmpty) ...[
@@ -356,7 +398,11 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
                 Row(
                   children: [
                     if (model.pullCount.isNotEmpty) ...[
-                      Icon(Icons.download_rounded, size: 14, color: colors.onSurface.withValues(alpha: 0.4)),
+                      Icon(
+                        Icons.download_rounded,
+                        size: 14,
+                        color: colors.onSurface.withValues(alpha: 0.4),
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${model.pullCount} pulls',
@@ -365,10 +411,15 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
                         ),
                       ),
                     ],
-                    if (model.pullCount.isNotEmpty && model.updatedAt.isNotEmpty)
+                    if (model.pullCount.isNotEmpty &&
+                        model.updatedAt.isNotEmpty)
                       const SizedBox(width: 16),
                     if (model.updatedAt.isNotEmpty) ...[
-                      Icon(Icons.access_time_rounded, size: 14, color: colors.onSurface.withValues(alpha: 0.4)),
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 14,
+                        color: colors.onSurface.withValues(alpha: 0.4),
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         model.updatedAt,
@@ -387,7 +438,11 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
     );
   }
 
-  Widget _buildFeaturedModelCard(LibraryModel model, ThemeData theme, ColorScheme colors) {
+  Widget _buildFeaturedModelCard(
+    LibraryModel model,
+    ThemeData theme,
+    ColorScheme colors,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -405,7 +460,9 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
                   children: [
                     Text(
                       model.name,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -427,7 +484,11 @@ class _ModelBrowserScreenState extends State<ModelBrowserScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.arrow_forward_ios_rounded, size: 14, color: colors.onSurface.withValues(alpha: 0.3)),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: colors.onSurface.withValues(alpha: 0.3),
+              ),
             ],
           ),
         ),
@@ -455,7 +516,11 @@ class _CapabilityChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 11, color: colors.tertiary, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          fontSize: 11,
+          color: colors.tertiary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -476,7 +541,11 @@ class _SizeChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 11, color: colors.primary, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          fontSize: 11,
+          color: colors.primary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -507,7 +576,9 @@ class _ModelDetailSheetState extends State<_ModelDetailSheet> {
   }
 
   Future<void> _loadDetail() async {
-    final detail = await OllamaLibrary.instance.fetchModelDetail(widget.modelName);
+    final detail = await OllamaLibrary.instance.fetchModelDetail(
+      widget.modelName,
+    );
     if (mounted) {
       setState(() {
         _detail = detail;
@@ -547,15 +618,24 @@ class _ModelDetailSheetState extends State<_ModelDetailSheet> {
               ),
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
-                    Icon(Icons.smart_toy_rounded, color: colors.primary, size: 28),
+                    Icon(
+                      Icons.smart_toy_rounded,
+                      color: colors.primary,
+                      size: 28,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         widget.modelName,
-                        style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -571,114 +651,139 @@ class _ModelDetailSheetState extends State<_ModelDetailSheet> {
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : _detail == null
-                        ? Center(
-                            child: Text(
-                              'Could not load model details',
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: colors.onSurface.withValues(alpha: 0.5),
+                    ? Center(
+                        child: Text(
+                          'Could not load model details',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: colors.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      )
+                    : ListView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.all(24),
+                        children: [
+                          // Summary / developer description
+                          if (_detail!.summary.isNotEmpty) ...[
+                            Text(
+                              'About',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: colors.primary,
                               ),
                             ),
-                          )
-                        : ListView(
-                            controller: scrollController,
-                            padding: const EdgeInsets.all(24),
-                            children: [
-                              // Summary / developer description
-                              if (_detail!.summary.isNotEmpty) ...[
-                                Text(
-                                  'About',
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: colors.primary,
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: colors.surfaceContainerLow,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: colors.outlineVariant.withValues(
+                                    alpha: 0.3,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: colors.surfaceContainerLow,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: colors.outlineVariant.withValues(alpha: 0.3),
+                              ),
+                              child: Text(
+                                _detail!.summary,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+
+                          // Stats row
+                          if (_detail!.pullCount.isNotEmpty ||
+                              _detail!.updatedAt.isNotEmpty) ...[
+                            Row(
+                              children: [
+                                if (_detail!.pullCount.isNotEmpty)
+                                  _StatItem(
+                                    icon: Icons.download_rounded,
+                                    label: '${_detail!.pullCount} downloads',
+                                    colors: colors,
+                                  ),
+                                if (_detail!.pullCount.isNotEmpty &&
+                                    _detail!.updatedAt.isNotEmpty)
+                                  const SizedBox(width: 24),
+                                if (_detail!.updatedAt.isNotEmpty)
+                                  _StatItem(
+                                    icon: Icons.access_time_rounded,
+                                    label: 'Updated ${_detail!.updatedAt}',
+                                    colors: colors,
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+
+                          // Capabilities
+                          if (_detail!.capabilities.isNotEmpty) ...[
+                            Text(
+                              'Capabilities',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: _detail!.capabilities
+                                  .map(
+                                    (cap) => _CapabilityChip(
+                                      label: cap,
+                                      colors: colors,
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+
+                          // Available tags — download buttons
+                          if (_detail!.availableTags.isNotEmpty) ...[
+                            Text(
+                              'Available Variants',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ..._detail!.availableTags.map(
+                              (tag) => Card(
+                                margin: const EdgeInsets.only(bottom: 6),
+                                child: ListTile(
+                                  dense: true,
+                                  title: Text(
+                                    tag,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'monospace',
                                     ),
                                   ),
-                                  child: Text(
-                                    _detail!.summary,
-                                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+                                  trailing: OutlinedButton.icon(
+                                    onPressed: () => widget.onDownload(tag),
+                                    icon: const Icon(
+                                      Icons.download_rounded,
+                                      size: 16,
+                                    ),
+                                    label: const Text('Pull'),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      minimumSize: const Size(0, 34),
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: 24),
-                              ],
-
-                              // Stats row
-                              if (_detail!.pullCount.isNotEmpty || _detail!.updatedAt.isNotEmpty) ...[
-                                Row(
-                                  children: [
-                                    if (_detail!.pullCount.isNotEmpty)
-                                      _StatItem(
-                                        icon: Icons.download_rounded,
-                                        label: '${_detail!.pullCount} downloads',
-                                        colors: colors,
-                                      ),
-                                    if (_detail!.pullCount.isNotEmpty && _detail!.updatedAt.isNotEmpty)
-                                      const SizedBox(width: 24),
-                                    if (_detail!.updatedAt.isNotEmpty)
-                                      _StatItem(
-                                        icon: Icons.access_time_rounded,
-                                        label: 'Updated ${_detail!.updatedAt}',
-                                        colors: colors,
-                                      ),
-                                  ],
-                                ),
-                                const SizedBox(height: 24),
-                              ],
-
-                              // Capabilities
-                              if (_detail!.capabilities.isNotEmpty) ...[
-                                Text(
-                                  'Capabilities',
-                                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                                ),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: _detail!.capabilities
-                                      .map((cap) => _CapabilityChip(label: cap, colors: colors))
-                                      .toList(),
-                                ),
-                                const SizedBox(height: 24),
-                              ],
-
-                              // Available tags — download buttons
-                              if (_detail!.availableTags.isNotEmpty) ...[
-                                Text(
-                                  'Available Variants',
-                                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                                ),
-                                const SizedBox(height: 8),
-                                ..._detail!.availableTags.map((tag) => Card(
-                                      margin: const EdgeInsets.only(bottom: 6),
-                                      child: ListTile(
-                                        dense: true,
-                                        title: Text(
-                                          tag,
-                                          style: const TextStyle(fontWeight: FontWeight.w500, fontFamily: 'monospace'),
-                                        ),
-                                        trailing: OutlinedButton.icon(
-                                          onPressed: () => widget.onDownload(tag),
-                                          icon: const Icon(Icons.download_rounded, size: 16),
-                                          label: const Text('Pull'),
-                                          style: OutlinedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                                            minimumSize: const Size(0, 34),
-                                          ),
-                                        ),
-                                      ),
-                                    )),
-                              ],
-                            ],
-                          ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
               ),
             ],
           ),
@@ -692,7 +797,11 @@ class _StatItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final ColorScheme colors;
-  const _StatItem({required this.icon, required this.label, required this.colors});
+  const _StatItem({
+    required this.icon,
+    required this.label,
+    required this.colors,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -703,7 +812,10 @@ class _StatItem extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           label,
-          style: TextStyle(fontSize: 13, color: colors.onSurface.withValues(alpha: 0.6)),
+          style: TextStyle(
+            fontSize: 13,
+            color: colors.onSurface.withValues(alpha: 0.6),
+          ),
         ),
       ],
     );
@@ -737,44 +849,46 @@ class _ModelDownloadDialogState extends State<_ModelDownloadDialog> {
 
   void _startDownload() {
     try {
-      _subscription = OllamaService.instance.pullModel(widget.modelName).listen(
-        (event) {
-          if (mounted) {
-            setState(() {
-              _generalStatus = event.status ?? 'Downloading...';
-              if (event.digest != null) {
-                final digest = event.digest!;
-                _layers[digest] = _LayerProgress(
-                  digest: digest,
-                  status: event.status ?? 'processing',
-                  completed: event.completed ?? 0,
-                  total: event.total ?? 0,
-                );
+      _subscription = OllamaService.instance
+          .pullModel(widget.modelName)
+          .listen(
+            (event) {
+              if (mounted) {
+                setState(() {
+                  _generalStatus = event.status ?? 'Downloading...';
+                  if (event.digest != null) {
+                    final digest = event.digest!;
+                    _layers[digest] = _LayerProgress(
+                      digest: digest,
+                      status: event.status ?? 'processing',
+                      completed: event.completed ?? 0,
+                      total: event.total ?? 0,
+                    );
+                  }
+                  if (event.status == 'success') {
+                    _isFinished = true;
+                    _generalStatus = 'Completed successfully!';
+                  }
+                });
               }
-              if (event.status == 'success') {
-                _isFinished = true;
-                _generalStatus = 'Completed successfully!';
+            },
+            onError: (err) {
+              if (mounted) {
+                setState(() {
+                  _errorMessage = err.toString();
+                  _generalStatus = 'Failed';
+                });
               }
-            });
-          }
-        },
-        onError: (err) {
-          if (mounted) {
-            setState(() {
-              _errorMessage = err.toString();
-              _generalStatus = 'Failed';
-            });
-          }
-        },
-        onDone: () {
-          if (mounted && !_isFinished && _errorMessage == null) {
-            setState(() {
-              _isFinished = true;
-              _generalStatus = 'Completed';
-            });
-          }
-        },
-      );
+            },
+            onDone: () {
+              if (mounted && !_isFinished && _errorMessage == null) {
+                setState(() {
+                  _isFinished = true;
+                  _generalStatus = 'Completed';
+                });
+              }
+            },
+          );
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -819,7 +933,9 @@ class _ModelDownloadDialogState extends State<_ModelDownloadDialog> {
             children: [
               Text(
                 'Pulling Model',
-                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
                 widget.modelName,
@@ -838,7 +954,10 @@ class _ModelDownloadDialogState extends State<_ModelDownloadDialog> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.error_outline_rounded, color: colors.onErrorContainer),
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: colors.onErrorContainer,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -853,7 +972,9 @@ class _ModelDownloadDialogState extends State<_ModelDownloadDialog> {
               ],
               Text(
                 _generalStatus,
-                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 8),
               if (!_isFinished && _errorMessage == null && layersList.isEmpty)
@@ -878,14 +999,20 @@ class _ModelDownloadDialogState extends State<_ModelDownloadDialog> {
                             Row(
                               children: [
                                 Icon(
-                                  isSuccess ? Icons.check_circle_rounded : Icons.downloading_rounded,
+                                  isSuccess
+                                      ? Icons.check_circle_rounded
+                                      : Icons.downloading_rounded,
                                   size: 16,
-                                  color: isSuccess ? Colors.green : colors.primary,
+                                  color: isSuccess
+                                      ? Colors.green
+                                      : colors.primary,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   shortDigest,
-                                  style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontFamily: 'monospace',
+                                  ),
                                 ),
                                 const Spacer(),
                                 Text(
@@ -917,7 +1044,11 @@ class _ModelDownloadDialogState extends State<_ModelDownloadDialog> {
                         _subscription?.cancel();
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Cancelled pulling ${widget.modelName}')),
+                          SnackBar(
+                            content: Text(
+                              'Cancelled pulling ${widget.modelName}',
+                            ),
+                          ),
                         );
                       },
                       child: const Text('Cancel'),

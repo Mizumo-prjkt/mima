@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, file_names
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
@@ -279,7 +281,10 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
     return Column(
       children: [
         _buildHeader(context),
-        Divider(height: 1, color: colors.outlineVariant.withOpacity(0.12)),
+        Divider(
+          height: 1,
+          color: colors.outlineVariant.withValues(alpha: 0.12),
+        ),
         Expanded(child: _buildMessageList(context)),
         _buildInputBar(context),
       ],
@@ -321,7 +326,7 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: colors.primary.withOpacity(0.10),
+                  color: colors.primary.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -356,7 +361,7 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
             // overflow menu
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert_rounded, size: 20),
-onSelected: (v) async {
+              onSelected: (v) async {
                 if (v == 'clear') {
                   final confirm = await MimaDialog.confirm(
                     context: context,
@@ -490,7 +495,10 @@ onSelected: (v) async {
               itemBuilder: (_) => const [
                 PopupMenuItem(value: 'options', child: Text('Options')),
                 PopupMenuItem(value: 'clear', child: Text('Clear chat')),
-                PopupMenuItem(value: 'delete', child: Text('Delete conversation')),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Text('Delete conversation'),
+                ),
                 PopupMenuItem(value: 'export', child: Text('Export chat')),
               ],
             ),
@@ -532,7 +540,7 @@ onSelected: (v) async {
                         Icons.smart_toy_outlined,
                         color: model == _selectedModel
                             ? colors.primary
-                            : colors.onSurface.withOpacity(0.5),
+                            : colors.onSurface.withValues(alpha: 0.5),
                       ),
                       title: Text(model),
                       trailing: model == _selectedModel
@@ -556,7 +564,7 @@ onSelected: (v) async {
                   ListTile(
                     leading: Icon(
                       Icons.download_rounded,
-                      color: colors.onSurface.withOpacity(0.6),
+                      color: colors.onSurface.withValues(alpha: 0.6),
                     ),
                     title: const Text('Browse & download models'),
                     onTap: () {
@@ -757,19 +765,19 @@ onSelected: (v) async {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: colors.primary.withOpacity(0.08),
+                color: colors.primary.withValues(alpha: 0.08),
               ),
               child: Icon(
                 Icons.chat_bubble_outline_rounded,
                 size: 48,
-                color: colors.primary.withOpacity(0.5),
+                color: colors.primary.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 20),
             Text(
               'Start a conversation',
               style: theme.textTheme.titleMedium?.copyWith(
-                color: colors.onSurface.withOpacity(0.6),
+                color: colors.onSurface.withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 8),
@@ -777,7 +785,7 @@ onSelected: (v) async {
               'Type a message below to chat with $_selectedModel',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.onSurface.withOpacity(0.35),
+                color: colors.onSurface.withValues(alpha: 0.35),
               ),
             ),
           ],
@@ -801,7 +809,7 @@ onSelected: (v) async {
       decoration: BoxDecoration(
         color: colors.surface,
         border: Border(
-          top: BorderSide(color: colors.outlineVariant.withOpacity(0.12)),
+          top: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.12)),
         ),
       ),
       child: Row(
@@ -812,7 +820,7 @@ onSelected: (v) async {
             onPressed: () => Navigator.pushNamed(context, '/filepicker'),
             icon: const Icon(Icons.attach_file_rounded, size: 22),
             style: IconButton.styleFrom(
-              foregroundColor: colors.onSurface.withOpacity(0.5),
+              foregroundColor: colors.onSurface.withValues(alpha: 0.5),
             ),
           ),
 
@@ -849,13 +857,13 @@ onSelected: (v) async {
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide(
-                        color: colors.outlineVariant.withOpacity(0.15),
+                        color: colors.outlineVariant.withValues(alpha: 0.15),
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide(
-                        color: colors.primary.withOpacity(0.5),
+                        color: colors.primary.withValues(alpha: 0.5),
                       ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
@@ -931,7 +939,7 @@ class _MessageBubble extends StatelessWidget {
             // avatar
             CircleAvatar(
               radius: 16,
-              backgroundColor: colors.primary.withOpacity(0.12),
+              backgroundColor: colors.primary.withValues(alpha: 0.12),
               child: Icon(
                 Icons.auto_awesome_rounded,
                 size: 16,
@@ -955,7 +963,7 @@ class _MessageBubble extends StatelessWidget {
                 border: isUser
                     ? null
                     : Border.all(
-                        color: colors.outlineVariant.withOpacity(0.12),
+                        color: colors.outlineVariant.withValues(alpha: 0.12),
                       ),
               ),
               child: Column(
@@ -971,8 +979,8 @@ class _MessageBubble extends StatelessWidget {
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 11,
                       color: isUser
-                          ? colors.onPrimary.withOpacity(0.55)
-                          : colors.onSurface.withOpacity(0.35),
+                          ? colors.onPrimary.withValues(alpha: 0.55)
+                          : colors.onSurface.withValues(alpha: 0.35),
                     ),
                   ),
                 ],
@@ -1016,7 +1024,7 @@ class _MessageBubble extends StatelessWidget {
               color: colors.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: colors.outlineVariant.withOpacity(0.15),
+                color: colors.outlineVariant.withValues(alpha: 0.15),
               ),
             ),
             child: SelectableText(
@@ -1024,7 +1032,7 @@ class _MessageBubble extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 13,
-                color: colors.onSurface.withOpacity(0.85),
+                color: colors.onSurface.withValues(alpha: 0.85),
                 height: 1.5,
               ),
             ),
@@ -1083,7 +1091,7 @@ class _TypingIndicator extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundColor: colors.primary.withOpacity(0.12),
+            backgroundColor: colors.primary.withValues(alpha: 0.12),
             child: Icon(
               Icons.auto_awesome_rounded,
               size: 16,
@@ -1102,7 +1110,7 @@ class _TypingIndicator extends StatelessWidget {
                 bottomRight: Radius.circular(18),
               ),
               border: Border.all(
-                color: colors.outlineVariant.withOpacity(0.12),
+                color: colors.outlineVariant.withValues(alpha: 0.12),
               ),
             ),
             child: AnimatedBuilder(
@@ -1122,7 +1130,7 @@ class _TypingIndicator extends StatelessWidget {
                         height: 7,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: colors.onSurface.withOpacity(0.35),
+                          color: colors.onSurface.withValues(alpha: 0.35),
                         ),
                       ),
                     );

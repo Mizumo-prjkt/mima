@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform, exit, File;
@@ -36,14 +37,16 @@ void main(List<String> args) async {
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();
-    
+
     WindowOptions windowOptions = WindowOptions(
       size: const Size(1100, 750),
       minimumSize: const Size(400, 600),
       center: true,
       backgroundColor: Colors.transparent,
       // Hide title bar only on Windows and macOS. Linux DEs (GTK/Plasma) expect native SSDs.
-      titleBarStyle: Platform.isLinux ? TitleBarStyle.normal : TitleBarStyle.hidden,
+      titleBarStyle: Platform.isLinux
+          ? TitleBarStyle.normal
+          : TitleBarStyle.hidden,
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
@@ -78,22 +81,32 @@ Future<void> _handleCommandLineArgs(List<String> args) async {
       }
     } catch (_) {}
 
-    print('[Mima] Purged all database and settings files.');
+    if (kDebugMode) {
+      print('[Mima] Purged all database and settings files.');
+    }
     handled = true;
   } else if (args.contains('--reset-app')) {
     try {
       await MimaStore.instance.clearAppSettings();
-      print('[Mima] Cleared all app settings.');
+      if (kDebugMode) {
+        print('[Mima] Cleared all app settings.');
+      }
     } catch (e) {
-      print('[Mima] Failed to clear app settings: $e');
+      if (kDebugMode) {
+        print('[Mima] Failed to clear app settings: $e');
+      }
     }
     handled = true;
   } else if (args.contains('--reset-db')) {
     try {
       await MimaStore.instance.clearChatDatabase();
-      print('[Mima] Cleared all chat sessions and messages.');
+      if (kDebugMode) {
+        print('[Mima] Cleared all chat sessions and messages.');
+      }
     } catch (e) {
-      print('[Mima] Failed to clear chat database: $e');
+      if (kDebugMode) {
+        print('[Mima] Failed to clear chat database: $e');
+      }
     }
     handled = true;
   }
@@ -126,9 +139,7 @@ class MimaApp extends StatelessWidget {
               children: [
                 const TitleBar(),
                 Expanded(
-                  child: ClipRect(
-                    child: child ?? const SizedBox.shrink(),
-                  ),
+                  child: ClipRect(child: child ?? const SizedBox.shrink()),
                 ),
               ],
             );
@@ -137,6 +148,7 @@ class MimaApp extends StatelessWidget {
       },
     );
   }
+
   Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
     Widget page;
     switch (settings.name) {
@@ -181,17 +193,18 @@ class MimaApp extends StatelessWidget {
   }
 
   static ThemeData _buildDarkTheme() {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: _seedColor,
-      brightness: Brightness.dark,
-    ).copyWith(
-      surface: const Color(0xFF0E0E1B),
-      surfaceContainerLowest: const Color(0xFF0A0A14),
-      surfaceContainerLow: const Color(0xFF121220),
-      surfaceContainer: const Color(0xFF1A1A2E),
-      surfaceContainerHigh: const Color(0xFF222236),
-      surfaceContainerHighest: const Color(0xFF2A2A3E),
-    );
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: _seedColor,
+          brightness: Brightness.dark,
+        ).copyWith(
+          surface: const Color(0xFF0E0E1B),
+          surfaceContainerLowest: const Color(0xFF0A0A14),
+          surfaceContainerLow: const Color(0xFF121220),
+          surfaceContainer: const Color(0xFF1A1A2E),
+          surfaceContainerHigh: const Color(0xFF222236),
+          surfaceContainerHighest: const Color(0xFF2A2A3E),
+        );
     return _buildThemeData(colorScheme, Brightness.dark);
   }
 
@@ -203,7 +216,10 @@ class MimaApp extends StatelessWidget {
     return _buildThemeData(colorScheme, Brightness.light);
   }
 
-  static ThemeData _buildThemeData(ColorScheme colorScheme, Brightness brightness) {
+  static ThemeData _buildThemeData(
+    ColorScheme colorScheme,
+    Brightness brightness,
+  ) {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
@@ -226,8 +242,10 @@ class MimaApp extends StatelessWidget {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colorScheme.surfaceContainerLow,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -272,9 +290,7 @@ class MimaApp extends StatelessWidget {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
 
@@ -305,9 +321,7 @@ class MimaApp extends StatelessWidget {
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
 
       // SnackBar
@@ -335,8 +349,7 @@ class MimaApp extends StatelessWidget {
       // ListTile
       listTileTheme: ListTileThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
 
       // Switch
@@ -370,36 +383,44 @@ class MimaApp extends StatelessWidget {
 
       // Text
       textTheme: const TextTheme(
-        displayLarge:
-            TextStyle(fontWeight: FontWeight.w300, letterSpacing: -1.5),
-        displayMedium:
-            TextStyle(fontWeight: FontWeight.w300, letterSpacing: -0.5),
-        displaySmall:
-            TextStyle(fontWeight: FontWeight.w400, letterSpacing: 0),
-        headlineLarge:
-            TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.5),
-        headlineMedium:
-            TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.3),
-        headlineSmall:
-            TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0),
-        titleLarge:
-            TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0),
-        titleMedium:
-            TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.15),
-        titleSmall:
-            TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.1),
+        displayLarge: TextStyle(
+          fontWeight: FontWeight.w300,
+          letterSpacing: -1.5,
+        ),
+        displayMedium: TextStyle(
+          fontWeight: FontWeight.w300,
+          letterSpacing: -0.5,
+        ),
+        displaySmall: TextStyle(fontWeight: FontWeight.w400, letterSpacing: 0),
+        headlineLarge: TextStyle(
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.5,
+        ),
+        headlineMedium: TextStyle(
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.3,
+        ),
+        headlineSmall: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0),
+        titleLarge: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0),
+        titleMedium: TextStyle(
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.15,
+        ),
+        titleSmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.1),
         bodyLarge: TextStyle(
-            fontWeight: FontWeight.w400, letterSpacing: 0.15, height: 1.5),
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0.15,
+          height: 1.5,
+        ),
         bodyMedium: TextStyle(
-            fontWeight: FontWeight.w400, letterSpacing: 0.25, height: 1.5),
-        bodySmall:
-            TextStyle(fontWeight: FontWeight.w400, letterSpacing: 0.4),
-        labelLarge:
-            TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.5),
-        labelMedium:
-            TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.5),
-        labelSmall:
-            TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.5),
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0.25,
+          height: 1.5,
+        ),
+        bodySmall: TextStyle(fontWeight: FontWeight.w400, letterSpacing: 0.4),
+        labelLarge: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.5),
+        labelMedium: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.5),
+        labelSmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.5),
       ),
     );
   }

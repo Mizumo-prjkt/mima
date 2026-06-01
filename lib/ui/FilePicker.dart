@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 
 class FilePickerScreen extends StatefulWidget {
@@ -72,9 +74,10 @@ class _FilePickerScreenState extends State<FilePickerScreen> {
                         color: colors.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: colors.outlineVariant.withOpacity(0.5),
+                          color: colors.outlineVariant.withValues(alpha: 0.5),
                           width: 2,
-                          style: BorderStyle.solid, // Use solid for now as dashed requires custom painter or a package
+                          style: BorderStyle
+                              .solid, // Use solid for now as dashed requires custom painter or a package
                         ),
                       ),
                       child: Column(
@@ -83,7 +86,7 @@ class _FilePickerScreenState extends State<FilePickerScreen> {
                           Icon(
                             Icons.upload_file_rounded,
                             size: 48,
-                            color: colors.primary.withOpacity(0.5),
+                            color: colors.primary.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -98,7 +101,7 @@ class _FilePickerScreenState extends State<FilePickerScreen> {
                                 ? 'Supported: TXT, MD, CSV, JSON, PNG, JPG'
                                 : 'Supported: TXT, MD, CSV, JSON',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: colors.onSurface.withOpacity(0.5),
+                              color: colors.onSurface.withValues(alpha: 0.5),
                             ),
                           ),
                         ],
@@ -109,10 +112,7 @@ class _FilePickerScreenState extends State<FilePickerScreen> {
 
                   // ---- selected files list ----
                   if (_selectedFiles.isNotEmpty) ...[
-                    Text(
-                      'Selected Files',
-                      style: theme.textTheme.titleMedium,
-                    ),
+                    Text('Selected Files', style: theme.textTheme.titleMedium),
                     const SizedBox(height: 12),
                     Expanded(
                       child: ListView.builder(
@@ -133,8 +133,10 @@ class _FilePickerScreenState extends State<FilePickerScreen> {
                               title: Text(file),
                               subtitle: const Text('14 KB'),
                               trailing: IconButton(
-                                icon: Icon(Icons.remove_circle_outline,
-                                    color: colors.error),
+                                icon: Icon(
+                                  Icons.remove_circle_outline,
+                                  color: colors.error,
+                                ),
                                 onPressed: () => _removeFile(i),
                               ),
                             ),
@@ -148,7 +150,8 @@ class _FilePickerScreenState extends State<FilePickerScreen> {
                       child: Text(
                         'No files selected',
                         style: TextStyle(
-                            color: colors.onSurface.withOpacity(0.3)),
+                          color: colors.onSurface.withValues(alpha: 0.3),
+                        ),
                       ),
                     ),
                     const Spacer(),

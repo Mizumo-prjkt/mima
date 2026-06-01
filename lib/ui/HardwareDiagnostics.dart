@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart' as ollama;
 import '../ollama/ollama_dart.dart';
@@ -25,7 +27,7 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
 
   List<ollama.ModelSummary> _installedModels = [];
   List<ollama.RunningModel> _runningModels = [];
-  Map<String, ollama.ShowResponse> _modelDetails = {};
+  final Map<String, ollama.ShowResponse> _modelDetails = {};
 
   int _estimatedVramBytes = 0;
   bool _gpuDetected = false;
@@ -125,13 +127,17 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
         }
       } catch (e) {
         if (mounted) {
-          setState(() => _benchmarkResults.add(BenchmarkResult(
+          setState(
+            () => _benchmarkResults.add(
+              BenchmarkResult(
                 modelName: name,
                 tokenCount: 0,
                 elapsedSeconds: 0,
                 tokensPerSecond: 0,
                 response: 'Error: $e',
-              )));
+              ),
+            ),
+          );
         }
       }
 
@@ -145,8 +151,9 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
         _benchmarking = false;
         _benchmarkingModel = null;
         // Sort results by tokens/sec descending
-        _benchmarkResults.sort((a, b) =>
-            b.tokensPerSecond.compareTo(a.tokensPerSecond));
+        _benchmarkResults.sort(
+          (a, b) => b.tokensPerSecond.compareTo(a.tokensPerSecond),
+        );
       });
     }
   }
@@ -168,7 +175,9 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
     final modelSize = model.size ?? 0;
     if (_estimatedVramBytes <= 0) return _ModelFitness.unknown;
     if (modelSize <= _estimatedVramBytes) return _ModelFitness.fitsVram;
-    if (modelSize <= _estimatedVramBytes * 1.5) return _ModelFitness.partialOffload;
+    if (modelSize <= _estimatedVramBytes * 1.5) {
+      return _ModelFitness.partialOffload;
+    }
     return _ModelFitness.cpuOnly;
   }
 
@@ -278,15 +287,14 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
                 height: 10,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _serverOnline
-                      ? const Color(0xFF4CAF50)
-                      : colors.error,
+                  color: _serverOnline ? const Color(0xFF4CAF50) : colors.error,
                   boxShadow: [
                     BoxShadow(
-                      color: (_serverOnline
-                              ? const Color(0xFF4CAF50)
-                              : colors.error)
-                          .withOpacity(0.4),
+                      color:
+                          (_serverOnline
+                                  ? const Color(0xFF4CAF50)
+                                  : colors.error)
+                              .withValues(alpha: 0.4),
                       blurRadius: 8,
                       spreadRadius: 1,
                     ),
@@ -297,38 +305,33 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
               Text(
                 _serverOnline ? 'Online' : 'Offline',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: _serverOnline
-                      ? const Color(0xFF4CAF50)
-                      : colors.error,
+                  color: _serverOnline ? const Color(0xFF4CAF50) : colors.error,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
         ),
-        _InfoRow(
-          label: 'URL',
-          value: _serverUrl,
-        ),
+        _InfoRow(label: 'URL', value: _serverUrl),
         if (_serverVersion != null)
-          _InfoRow(
-            label: 'Ollama Version',
-            value: _serverVersion!,
-          ),
+          _InfoRow(label: 'Ollama Version', value: _serverVersion!),
         if (!_serverOnline)
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colors.error.withOpacity(0.1),
+                color: colors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colors.error.withOpacity(0.2)),
+                border: Border.all(color: colors.error.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded,
-                      color: colors.error, size: 20),
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: colors.error,
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -352,8 +355,10 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    final totalDisk =
-        _installedModels.fold<int>(0, (sum, m) => sum + (m.size ?? 0));
+    final totalDisk = _installedModels.fold<int>(
+      0,
+      (sum, m) => sum + (m.size ?? 0),
+    );
 
     return _DiagCard(
       icon: Icons.memory_rounded,
@@ -371,7 +376,7 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
                 size: 18,
                 color: _gpuDetected
                     ? const Color(0xFF4CAF50)
-                    : colors.onSurface.withOpacity(0.3),
+                    : colors.onSurface.withValues(alpha: 0.3),
               ),
               const SizedBox(width: 8),
               Text(
@@ -380,7 +385,7 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
                   fontWeight: FontWeight.w600,
                   color: _gpuDetected
                       ? const Color(0xFF4CAF50)
-                      : colors.onSurface.withOpacity(0.5),
+                      : colors.onSurface.withValues(alpha: 0.5),
                 ),
               ),
             ],
@@ -392,28 +397,27 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
               ? _formatBytes(_estimatedVramBytes)
               : 'Unknown — load a model to detect',
         ),
-        _InfoRow(
-          label: 'Models Loaded',
-          value: '${_runningModels.length}',
-        ),
-        _InfoRow(
-          label: 'Total Disk Used',
-          value: _formatBytes(totalDisk),
-        ),
+        _InfoRow(label: 'Models Loaded', value: '${_runningModels.length}'),
+        _InfoRow(label: 'Total Disk Used', value: _formatBytes(totalDisk)),
         if (_estimatedVramBytes <= 0 && _installedModels.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colors.tertiary.withOpacity(0.08),
+                color: colors.tertiary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colors.tertiary.withOpacity(0.15)),
+                border: Border.all(
+                  color: colors.tertiary.withValues(alpha: 0.15),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline_rounded,
-                      color: colors.tertiary, size: 18),
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: colors.tertiary,
+                    size: 18,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -448,13 +452,16 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
             child: Center(
               child: Column(
                 children: [
-                  Icon(Icons.download_rounded,
-                      size: 40, color: colors.onSurface.withOpacity(0.15)),
+                  Icon(
+                    Icons.download_rounded,
+                    size: 40,
+                    color: colors.onSurface.withValues(alpha: 0.15),
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'No models installed',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colors.onSurface.withOpacity(0.4),
+                      color: colors.onSurface.withValues(alpha: 0.4),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -475,37 +482,48 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
               children: [
                 Expanded(
                   flex: 3,
-                  child: Text('Model',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.onSurface.withOpacity(0.4),
-                      )),
+                  child: Text(
+                    'Model',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ),
                 Expanded(
                   flex: 2,
-                  child: Text('Params',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.onSurface.withOpacity(0.4),
-                      )),
+                  child: Text(
+                    'Params',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ),
                 Expanded(
                   flex: 2,
-                  child: Text('Quant',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.onSurface.withOpacity(0.4),
-                      )),
+                  child: Text(
+                    'Quant',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ),
                 Expanded(
                   flex: 2,
-                  child: Text('Size',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.onSurface.withOpacity(0.4),
-                      )),
+                  child: Text(
+                    'Size',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 80, child: SizedBox.shrink()),
               ],
             ),
           ),
-          Divider(height: 1, color: colors.outlineVariant.withOpacity(0.1)),
+          Divider(
+            height: 1,
+            color: colors.outlineVariant.withValues(alpha: 0.1),
+          ),
           ..._installedModels.map((m) => _buildModelRow(m)),
         ],
       ],
@@ -550,10 +568,7 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
               style: theme.textTheme.bodySmall,
             ),
           ),
-          SizedBox(
-            width: 80,
-            child: _FitnessChip(fitness: fitness),
-          ),
+          SizedBox(width: 80, child: _FitnessChip(fitness: fitness)),
         ],
       ),
     );
@@ -584,8 +599,10 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
                   : const Icon(Icons.play_arrow_rounded, size: 18),
               label: Text(_benchmarking ? 'Running…' : 'Run Benchmark'),
               style: FilledButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
               ),
             )
           : null,
@@ -598,14 +615,17 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
           ),
           child: Row(
             children: [
-              Icon(Icons.lightbulb_outline_rounded,
-                  size: 16, color: colors.onSurface.withOpacity(0.4)),
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                size: 16,
+                color: colors.onSurface.withValues(alpha: 0.4),
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Sends a fixed prompt to each model and measures tokens/sec.',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colors.onSurface.withOpacity(0.5),
+                    color: colors.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               ),
@@ -627,36 +647,47 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
               children: [
                 Expanded(
                   flex: 3,
-                  child: Text('Model',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.onSurface.withOpacity(0.4),
-                      )),
+                  child: Text(
+                    'Model',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ),
                 Expanded(
                   flex: 2,
-                  child: Text('Tokens',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.onSurface.withOpacity(0.4),
-                      )),
+                  child: Text(
+                    'Tokens',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ),
                 Expanded(
                   flex: 2,
-                  child: Text('Time',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.onSurface.withOpacity(0.4),
-                      )),
+                  child: Text(
+                    'Time',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ),
                 Expanded(
                   flex: 2,
-                  child: Text('tok/s',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.onSurface.withOpacity(0.4),
-                      )),
+                  child: Text(
+                    'tok/s',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
-          Divider(height: 1, color: colors.outlineVariant.withOpacity(0.1)),
+          Divider(
+            height: 1,
+            color: colors.outlineVariant.withValues(alpha: 0.1),
+          ),
           ..._benchmarkResults.asMap().entries.map((entry) {
             final i = entry.key;
             final r = entry.value;
@@ -672,8 +703,11 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
                         if (isBest)
                           Padding(
                             padding: const EdgeInsets.only(right: 6),
-                            child: Icon(Icons.emoji_events_rounded,
-                                size: 16, color: const Color(0xFFFFD700)),
+                            child: Icon(
+                              Icons.emoji_events_rounded,
+                              size: 16,
+                              color: const Color(0xFFFFD700),
+                            ),
                           ),
                         Flexible(
                           child: Text(
@@ -689,13 +723,17 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
                   ),
                   Expanded(
                     flex: 2,
-                    child: Text('${r.tokenCount}',
-                        style: theme.textTheme.bodySmall),
+                    child: Text(
+                      '${r.tokenCount}',
+                      style: theme.textTheme.bodySmall,
+                    ),
                   ),
                   Expanded(
                     flex: 2,
-                    child: Text('${r.elapsedSeconds.toStringAsFixed(1)}s',
-                        style: theme.textTheme.bodySmall),
+                    child: Text(
+                      '${r.elapsedSeconds.toStringAsFixed(1)}s',
+                      style: theme.textTheme.bodySmall,
+                    ),
                   ),
                   Expanded(
                     flex: 2,
@@ -747,13 +785,16 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
             ),
             child: Column(
               children: [
-                Icon(Icons.help_outline_rounded,
-                    size: 36, color: colors.onSurface.withOpacity(0.2)),
+                Icon(
+                  Icons.help_outline_rounded,
+                  size: 36,
+                  color: colors.onSurface.withValues(alpha: 0.2),
+                ),
                 const SizedBox(height: 12),
                 Text(
                   'VRAM not yet detected',
                   style: theme.textTheme.titleSmall?.copyWith(
-                    color: colors.onSurface.withOpacity(0.5),
+                    color: colors.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -762,7 +803,7 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
                   'then we can recommend models that will run well.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colors.onSurface.withOpacity(0.35),
+                    color: colors.onSurface.withValues(alpha: 0.35),
                   ),
                 ),
               ],
@@ -775,19 +816,22 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF00BCD4).withOpacity(0.12),
-                  colors.primary.withOpacity(0.08),
+                  const Color(0xFF00BCD4).withValues(alpha: 0.12),
+                  colors.primary.withValues(alpha: 0.08),
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: const Color(0xFF00BCD4).withOpacity(0.2),
+                color: const Color(0xFF00BCD4).withValues(alpha: 0.2),
               ),
             ),
             child: Row(
               children: [
-                Icon(Icons.memory_rounded,
-                    color: const Color(0xFF00BCD4), size: 22),
+                Icon(
+                  Icons.memory_rounded,
+                  color: const Color(0xFF00BCD4),
+                  size: 22,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -803,7 +847,7 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
                       Text(
                         _getVramTierLabel(vramGB),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: colors.onSurface.withOpacity(0.5),
+                          color: colors.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ],
@@ -814,16 +858,15 @@ class _HardwareDiagnosticsScreenState extends State<HardwareDiagnosticsScreen>
           ),
           const SizedBox(height: 16),
           // Recommendation list
-          ...recommendations.map((rec) => _RecommendationTile(
-                name: rec.name,
-                description: rec.description,
-                paramSize: rec.paramSize,
-                fit: rec.fit,
-                onDownload: () => Navigator.pushNamed(
-                  context,
-                  '/models/browse',
-                ),
-              )),
+          ...recommendations.map(
+            (rec) => _RecommendationTile(
+              name: rec.name,
+              description: rec.description,
+              paramSize: rec.paramSize,
+              fit: rec.fit,
+              onDownload: () => Navigator.pushNamed(context, '/models/browse'),
+            ),
+          ),
         ],
       ],
     );
@@ -981,10 +1024,12 @@ class _DiagCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surfaceContainer,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colors.outlineVariant.withOpacity(0.12)),
+        border: Border.all(
+          color: colors.outlineVariant.withValues(alpha: 0.12),
+        ),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withOpacity(0.04),
+            color: accentColor.withValues(alpha: 0.04),
             blurRadius: 24,
             offset: const Offset(0, 4),
           ),
@@ -999,7 +1044,7 @@ class _DiagCard extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  accentColor.withOpacity(0.08),
+                  accentColor.withValues(alpha: 0.08),
                   Colors.transparent,
                 ],
               ),
@@ -1013,7 +1058,7 @@ class _DiagCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.12),
+                    color: accentColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, size: 18, color: accentColor),
@@ -1065,7 +1110,7 @@ class _InfoRow extends StatelessWidget {
           Text(
             label,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colors.onSurface.withOpacity(0.5),
+              color: colors.onSurface.withValues(alpha: 0.5),
             ),
           ),
           const Spacer(),
@@ -1104,8 +1149,8 @@ class _LoadingIndicator extends StatelessWidget {
         Text(
           'Running diagnostics…',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: colors.onSurface.withOpacity(0.5),
-              ),
+            color: colors.onSurface.withValues(alpha: 0.5),
+          ),
         ),
       ],
     );
@@ -1125,9 +1170,11 @@ class _BenchmarkProgress extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFF9800).withOpacity(0.08),
+        color: const Color(0xFFFF9800).withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.15)),
+        border: Border.all(
+          color: const Color(0xFFFF9800).withValues(alpha: 0.15),
+        ),
       ),
       child: Row(
         children: [
@@ -1144,7 +1191,7 @@ class _BenchmarkProgress extends StatelessWidget {
             child: Text(
               'Benchmarking $modelName…',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: colors.onSurface.withOpacity(0.7),
+                color: colors.onSurface.withValues(alpha: 0.7),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -1163,18 +1210,30 @@ class _FitnessChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color, icon) = switch (fitness) {
-      _ModelFitness.fitsVram => ('GPU', const Color(0xFF4CAF50), Icons.check_circle_rounded),
-      _ModelFitness.partialOffload => ('Partial', const Color(0xFFFF9800), Icons.warning_amber_rounded),
-      _ModelFitness.cpuOnly => ('CPU', const Color(0xFFF44336), Icons.cancel_rounded),
+      _ModelFitness.fitsVram => (
+        'GPU',
+        const Color(0xFF4CAF50),
+        Icons.check_circle_rounded,
+      ),
+      _ModelFitness.partialOffload => (
+        'Partial',
+        const Color(0xFFFF9800),
+        Icons.warning_amber_rounded,
+      ),
+      _ModelFitness.cpuOnly => (
+        'CPU',
+        const Color(0xFFF44336),
+        Icons.cancel_rounded,
+      ),
       _ModelFitness.unknown => ('?', Colors.grey, Icons.help_outline_rounded),
     };
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1229,7 +1288,9 @@ class _RecommendationTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: colors.surfaceContainerLow,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: colors.outlineVariant.withOpacity(0.1)),
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: 0.1),
+          ),
         ),
         child: Row(
           children: [
@@ -1237,7 +1298,7 @@ class _RecommendationTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: fitColor.withOpacity(0.10),
+                color: fitColor.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(Icons.smart_toy_rounded, size: 20, color: fitColor),
@@ -1259,9 +1320,11 @@ class _RecommendationTile extends StatelessWidget {
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: colors.primary.withOpacity(0.1),
+                          color: colors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -1279,7 +1342,7 @@ class _RecommendationTile extends StatelessWidget {
                   Text(
                     description,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurface.withOpacity(0.5),
+                      color: colors.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -1291,10 +1354,12 @@ class _RecommendationTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
-                    color: fitColor.withOpacity(0.12),
+                    color: fitColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(

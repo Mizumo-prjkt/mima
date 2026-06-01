@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import '../main.dart';
 import 'Chat.dart';
@@ -54,9 +56,11 @@ class _MainMenuScreenState extends State<MainMenuScreen>
     if (_searchQuery.isEmpty) return _chats;
     final q = _searchQuery.toLowerCase();
     return _chats
-        .where((c) =>
-            c.session.title.toLowerCase().contains(q) ||
-            (c.lastMessage?.content.toLowerCase().contains(q) ?? false))
+        .where(
+          (c) =>
+              c.session.title.toLowerCase().contains(q) ||
+              (c.lastMessage?.content.toLowerCase().contains(q) ?? false),
+        )
         .toList();
   }
 
@@ -70,8 +74,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
 
     return Scaffold(
       body: FadeTransition(
-        opacity:
-            CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut),
+        opacity: CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut),
         child: isWide ? _buildWideLayout() : _buildNarrowLayout(),
       ),
       // FAB only on narrow (mobile)
@@ -93,13 +96,10 @@ class _MainMenuScreenState extends State<MainMenuScreen>
     return Row(
       children: [
         // sidebar
-        SizedBox(
-          width: 340,
-          child: _buildSidebar(context),
-        ),
+        SizedBox(width: 340, child: _buildSidebar(context)),
         VerticalDivider(
           width: 1,
-          color: colors.outlineVariant.withOpacity(0.12),
+          color: colors.outlineVariant.withValues(alpha: 0.12),
         ),
         // main content
         Expanded(
@@ -158,13 +158,17 @@ class _MainMenuScreenState extends State<MainMenuScreen>
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(Icons.auto_awesome_rounded,
-                        size: 18, color: colors.onPrimary),
+                    child: Icon(
+                      Icons.auto_awesome_rounded,
+                      size: 18,
+                      color: colors.onPrimary,
+                    ),
                   ),
                   const SizedBox(width: 12),
-                  Text('Mima',
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(fontSize: 20)),
+                  Text(
+                    'Mima',
+                    style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
+                  ),
                   const Spacer(),
                   // new chat
                   IconButton(
@@ -186,7 +190,10 @@ class _MainMenuScreenState extends State<MainMenuScreen>
             Expanded(child: _buildChatList(isSidebar: true)),
 
             // bottom toolbar
-            Divider(height: 1, color: colors.outlineVariant.withOpacity(0.1)),
+            Divider(
+              height: 1,
+              color: colors.outlineVariant.withValues(alpha: 0.1),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
@@ -194,15 +201,13 @@ class _MainMenuScreenState extends State<MainMenuScreen>
                   _SidebarButton(
                     icon: Icons.download_rounded,
                     label: 'Models',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/models/manage'),
+                    onTap: () => Navigator.pushNamed(context, '/models/manage'),
                   ),
                   const Spacer(),
                   _SidebarButton(
                     icon: Icons.settings_rounded,
                     label: 'Settings',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/settings'),
+                    onTap: () => Navigator.pushNamed(context, '/settings'),
                   ),
                 ],
               ),
@@ -231,12 +236,17 @@ class _MainMenuScreenState extends State<MainMenuScreen>
               ),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(Icons.auto_awesome_rounded,
-                size: 16, color: colors.onPrimary),
+            child: Icon(
+              Icons.auto_awesome_rounded,
+              size: 16,
+              color: colors.onPrimary,
+            ),
           ),
           const SizedBox(width: 12),
-          Text('Mima',
-              style: theme.textTheme.titleLarge?.copyWith(fontSize: 20)),
+          Text(
+            'Mima',
+            style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
+          ),
           const Spacer(),
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/models/manage'),
@@ -264,12 +274,17 @@ class _MainMenuScreenState extends State<MainMenuScreen>
         controller: _searchController,
         onChanged: (v) => setState(() => _searchQuery = v),
         decoration: InputDecoration(
-          prefixIcon: Icon(Icons.search_rounded,
-              size: 20, color: colors.onSurface.withOpacity(0.4)),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            size: 20,
+            color: colors.onSurface.withValues(alpha: 0.4),
+          ),
           hintText: 'Search chats…',
           isDense: true,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 10,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide.none,
@@ -315,8 +330,11 @@ class _MainMenuScreenState extends State<MainMenuScreen>
             if (isSidebar) {
               setState(() => _selectedIndex = i);
             } else {
-              Navigator.pushNamed(context, '/chat', arguments: chat.session.id.toString())
-                  .then((_) => _loadChats());
+              Navigator.pushNamed(
+                context,
+                '/chat',
+                arguments: chat.session.id.toString(),
+              ).then((_) => _loadChats());
             }
           },
           onDelete: () => _deleteChat(i),
@@ -335,13 +353,16 @@ class _MainMenuScreenState extends State<MainMenuScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.forum_outlined,
-                size: 48, color: colors.onSurface.withOpacity(0.15)),
+            Icon(
+              Icons.forum_outlined,
+              size: 48,
+              color: colors.onSurface.withValues(alpha: 0.15),
+            ),
             const SizedBox(height: 16),
             Text(
               _searchQuery.isNotEmpty ? 'No results' : 'No chats yet',
               style: theme.textTheme.titleSmall?.copyWith(
-                color: colors.onSurface.withOpacity(0.4),
+                color: colors.onSurface.withValues(alpha: 0.4),
               ),
             ),
             if (_searchQuery.isEmpty) ...[
@@ -349,7 +370,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
               Text(
                 'Tap + to start a new conversation',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: colors.onSurface.withOpacity(0.25),
+                  color: colors.onSurface.withValues(alpha: 0.25),
                 ),
               ),
             ],
@@ -371,23 +392,26 @@ class _MainMenuScreenState extends State<MainMenuScreen>
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: colors.primary.withOpacity(0.06),
+              color: colors.primary.withValues(alpha: 0.06),
             ),
-            child: Icon(Icons.chat_rounded,
-                size: 56, color: colors.primary.withOpacity(0.3)),
+            child: Icon(
+              Icons.chat_rounded,
+              size: 56,
+              color: colors.primary.withValues(alpha: 0.3),
+            ),
           ),
           const SizedBox(height: 24),
           Text(
             'Select a conversation',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: colors.onSurface.withOpacity(0.5),
+              color: colors.onSurface.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Pick a chat from the sidebar or start a new one',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.onSurface.withOpacity(0.3),
+              color: colors.onSurface.withValues(alpha: 0.3),
             ),
           ),
         ],
@@ -398,7 +422,8 @@ class _MainMenuScreenState extends State<MainMenuScreen>
   // ---- actions --------------------------------------------------------------
 
   Future<void> _createNewChat() async {
-    final defaultModelName = await MimaStore.instance.getSetting('default_model') ?? 'llama3.2';
+    final defaultModelName =
+        await MimaStore.instance.getSetting('default_model') ?? 'llama3.2';
     final newSession = await MimaStore.instance.createSession(
       'New conversation',
       defaultModelName,
@@ -411,8 +436,11 @@ class _MainMenuScreenState extends State<MainMenuScreen>
           _selectedIndex = idx >= 0 ? idx : 0;
         });
       } else {
-        Navigator.pushNamed(context, '/chat', arguments: newSession.id.toString())
-            .then((_) => _loadChats());
+        Navigator.pushNamed(
+          context,
+          '/chat',
+          arguments: newSession.id.toString(),
+        ).then((_) => _loadChats());
       }
     }
   }
@@ -463,7 +491,7 @@ class _ChatListTile extends StatelessWidget {
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
           decoration: BoxDecoration(
-            color: colors.error.withOpacity(0.15),
+            color: colors.error.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(Icons.delete_rounded, color: colors.error),
@@ -471,15 +499,14 @@ class _ChatListTile extends StatelessWidget {
         onDismissed: (_) => onDelete(),
         child: Material(
           color: selected
-              ? colors.primary.withOpacity(0.10)
+              ? colors.primary.withValues(alpha: 0.10)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(12),
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               child: Row(
                 children: [
                   // chat icon
@@ -487,7 +514,7 @@ class _ChatListTile extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: selected
-                          ? colors.primary.withOpacity(0.15)
+                          ? colors.primary.withValues(alpha: 0.15)
                           : colors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -496,7 +523,7 @@ class _ChatListTile extends StatelessWidget {
                       size: 18,
                       color: selected
                           ? colors.primary
-                          : colors.onSurface.withOpacity(0.35),
+                          : colors.onSurface.withValues(alpha: 0.35),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -506,60 +533,67 @@ class _ChatListTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                        chat.session.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight:
-                              selected ? FontWeight.w600 : FontWeight.w500,
-                        ),
-                      ),
-                      if (chat.lastMessage != null && chat.lastMessage!.content.isNotEmpty) ...[
-                        const SizedBox(height: 3),
-                        Text(
-                          chat.lastMessage!.content,
+                          chat.session.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colors.onSurface.withOpacity(0.4),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: selected
+                                ? FontWeight.w600
+                                : FontWeight.w500,
                           ),
                         ),
+                        if (chat.lastMessage != null &&
+                            chat.lastMessage!.content.isNotEmpty) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            chat.lastMessage!.content,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colors.onSurface.withValues(alpha: 0.4),
+                            ),
+                          ),
+                        ],
                       ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // meta
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (chat.session.isPinned)
+                            Icon(
+                              Icons.push_pin_rounded,
+                              size: 11,
+                              color: colors.primary,
+                            ),
+                          if (chat.session.isPinned) const SizedBox(width: 4),
+                          Text(
+                            _timeAgo(
+                              chat.lastMessage?.timestamp ??
+                                  chat.session.createdAt,
+                            ),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 11,
+                              color: colors.onSurface.withValues(alpha: 0.3),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        chat.session.modelName,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
+                          color: colors.primary.withValues(alpha: 0.6),
+                        ),
+                      ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 8),
-                // meta
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (chat.session.isPinned)
-                          Icon(Icons.push_pin_rounded,
-                              size: 11, color: colors.primary),
-                        if (chat.session.isPinned)
-                          const SizedBox(width: 4),
-                        Text(
-                          _timeAgo(chat.lastMessage?.timestamp ?? chat.session.createdAt),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontSize: 11,
-                            color: colors.onSurface.withOpacity(0.3),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      chat.session.modelName,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontSize: 10,
-                        color: colors.primary.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ),
                 ],
               ),
             ),
@@ -585,8 +619,11 @@ class _SidebarButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _SidebarButton(
-      {required this.icon, required this.label, required this.onTap});
+  const _SidebarButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -596,7 +633,7 @@ class _SidebarButton extends StatelessWidget {
       icon: Icon(icon, size: 18),
       label: Text(label, style: const TextStyle(fontSize: 13)),
       style: TextButton.styleFrom(
-        foregroundColor: colors.onSurface.withOpacity(0.6),
+        foregroundColor: colors.onSurface.withValues(alpha: 0.6),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       ),
     );

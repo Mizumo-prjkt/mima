@@ -1,5 +1,6 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../versioning/versioning_aware.dart';
 
 /// Data class for a third-party package displayed in the About screen.
@@ -156,7 +157,9 @@ class _AboutScreenState extends State<AboutScreen>
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: colors.tertiary.withOpacity(0.12),
+                                  color: colors.tertiary.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
@@ -182,7 +185,7 @@ class _AboutScreenState extends State<AboutScreen>
                             'several open-source packages distributed via pub.dev. '
                             'Each package is subject to its own license terms as listed above.',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colors.onSurface.withOpacity(0.75),
+                              color: colors.onSurface.withValues(alpha: 0.75),
                               height: 1.6,
                             ),
                           ),
@@ -194,7 +197,7 @@ class _AboutScreenState extends State<AboutScreen>
                             'NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT '
                             'HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: colors.onSurface.withOpacity(0.5),
+                              color: colors.onSurface.withValues(alpha: 0.5),
                               height: 1.6,
                               fontStyle: FontStyle.italic,
                             ),
@@ -205,7 +208,7 @@ class _AboutScreenState extends State<AboutScreen>
                             'server. No data is sent to external services. '
                             'All conversations stay on your machine.',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colors.onSurface.withOpacity(0.75),
+                              color: colors.onSurface.withValues(alpha: 0.75),
                               height: 1.6,
                             ),
                           ),
@@ -224,7 +227,9 @@ class _AboutScreenState extends State<AboutScreen>
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF027DFD).withOpacity(0.12),
+                              color: const Color(
+                                0xFF027DFD,
+                              ).withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(
@@ -248,7 +253,9 @@ class _AboutScreenState extends State<AboutScreen>
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0175C2).withOpacity(0.12),
+                              color: const Color(
+                                0xFF0175C2,
+                              ).withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(
@@ -333,7 +340,7 @@ class _AboutScreenState extends State<AboutScreen>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: colors.primary.withOpacity(0.25),
+                  color: colors.primary.withValues(alpha: 0.25),
                   blurRadius: 32,
                   spreadRadius: 2,
                 ),
@@ -363,7 +370,7 @@ class _AboutScreenState extends State<AboutScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: colors.primary.withOpacity(0.08),
+              color: colors.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -378,7 +385,7 @@ class _AboutScreenState extends State<AboutScreen>
           Text(
             'Your local AI client companion · Powered by Ollama',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colors.onSurface.withOpacity(0.5),
+              color: colors.onSurface.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -449,7 +456,7 @@ class _PackageTile extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: colors.primary.withOpacity(0.08),
+          color: colors.primary.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Center(
@@ -474,13 +481,13 @@ class _PackageTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: colors.surfaceContainerHighest.withOpacity(0.5),
+              color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
               pkg.version,
               style: theme.textTheme.labelSmall?.copyWith(
-                color: colors.onSurface.withOpacity(0.6),
+                color: colors.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ),
@@ -493,14 +500,14 @@ class _PackageTile extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: colors.onSurface.withOpacity(0.55),
+            color: colors.onSurface.withValues(alpha: 0.55),
           ),
         ),
       ),
       trailing: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: colors.tertiary.withOpacity(0.1),
+          color: colors.tertiary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(

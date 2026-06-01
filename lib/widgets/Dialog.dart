@@ -55,8 +55,10 @@ class MimaDialog extends StatelessWidget {
         showCloseButton: showCloseButton,
       ),
       transitionBuilder: (ctx, animation, _, child) {
-        final curved =
-            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        );
         return BackdropFilter(
           filter: ImageFilter.blur(
             sigmaX: 6 * animation.value,
@@ -127,14 +129,14 @@ class MimaDialog extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: colors.outlineVariant.withOpacity(0.2),
+                  color: colors.outlineVariant.withValues(alpha: 0.2),
                 ),
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
                     colors.surfaceContainer,
-                    colors.surfaceContainerHigh.withOpacity(0.6),
+                    colors.surfaceContainerHigh.withValues(alpha: 0.6),
                   ],
                 ),
               ),
@@ -150,19 +152,25 @@ class MimaDialog extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: (iconColor ?? colors.primary)
-                                  .withOpacity(0.12),
+                              color: (iconColor ?? colors.primary).withValues(
+                                alpha: 0.12,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Icon(icon,
-                                color: iconColor ?? colors.primary, size: 22),
+                            child: Icon(
+                              icon,
+                              color: iconColor ?? colors.primary,
+                              size: 22,
+                            ),
                           ),
                           const SizedBox(width: 14),
                         ],
                         if (title != null)
                           Expanded(
-                            child: Text(title!,
-                                style: theme.textTheme.titleLarge),
+                            child: Text(
+                              title!,
+                              style: theme.textTheme.titleLarge,
+                            ),
                           ),
                         if (showCloseButton)
                           IconButton(

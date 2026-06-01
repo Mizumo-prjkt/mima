@@ -67,7 +67,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             center: Alignment.center,
             radius: 1.4,
             colors: [
-              colors.primary.withOpacity(0.07),
+              colors.primary.withValues(alpha: 0.07),
               colors.surface,
               colors.surfaceContainerLowest,
             ],
@@ -103,7 +103,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: colors.primary.withOpacity(0.35),
+                                color: colors.primary.withValues(alpha: 0.35),
                                 blurRadius: 48,
                                 spreadRadius: 4,
                               ),
@@ -138,7 +138,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       Text(
                         'Your local AI client companion',
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: colors.onSurface.withOpacity(0.55),
+                          color: colors.onSurface.withValues(alpha: 0.55),
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -176,7 +176,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       Text(
                         'Powered by Ollama',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: colors.onSurface.withOpacity(0.3),
+                          color: colors.onSurface.withValues(alpha: 0.3),
                         ),
                       ),
                     ],

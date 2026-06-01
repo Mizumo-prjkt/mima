@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart' as ollama;
 import '../ollama/ollama_dart.dart';
@@ -49,23 +51,28 @@ class _ModelManagerScreenState extends State<ModelManagerScreen> {
     final confirm = await MimaDialog.confirm(
       context: context,
       title: 'Delete Model',
-      message: 'Are you sure you want to delete $name? This will free up ${_formatBytes(size)} of disk space.',
+      message:
+          'Are you sure you want to delete $name? This will free up ${_formatBytes(size)} of disk space.',
       confirmText: 'Delete',
       confirmColor: Theme.of(context).colorScheme.error,
       icon: Icons.delete_outline,
     );
 
-    if (confirm && mounted) {
+    if (confirm) {
       final success = await OllamaService.instance.deleteModel(name);
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$name deleted')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('$name deleted')));
+        }
         _loadModels();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete $name')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to delete $name')));
+        }
       }
     }
   }
@@ -75,15 +82,19 @@ class _ModelManagerScreenState extends State<ModelManagerScreen> {
     setState(() {
       _defaultModelName = name;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Default model set to $name')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Default model set to $name')));
+    }
   }
 
   String _formatBytes(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
   }
 
@@ -144,78 +155,94 @@ class _ModelManagerScreenState extends State<ModelManagerScreen> {
                 // List
                 Expanded(
                   child: _isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(),
-                        )
+                      ? const Center(child: CircularProgressIndicator())
                       : _models.isEmpty
-                          ? Center(
-                              child: Text(
-                                'No models downloaded.',
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: colors.onSurface.withValues(alpha: 0.5),
+                      ? Center(
+                          child: Text(
+                            'No models downloaded.',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: colors.onSurface.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: _models.length,
+                          itemBuilder: (ctx, i) {
+                            final model = _models[i];
+                            final name = model.name ?? 'unknown';
+                            final size = model.size ?? 0;
+                            final isDefault = name == _defaultModelName;
+
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 6,
+                              ),
+                              child: ListTile(
+                                leading: Icon(
+                                  Icons.smart_toy_rounded,
+                                  color: isDefault
+                                      ? colors.primary
+                                      : colors.onSurface.withValues(alpha: 0.5),
+                                ),
+                                title: Row(
+                                  children: [
+                                    Text(
+                                      name,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    if (isDefault) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: colors.primaryContainer,
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Default',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: colors.onPrimaryContainer,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                subtitle: Text(_formatBytes(size)),
+                                trailing: PopupMenuButton<String>(
+                                  onSelected: (val) {
+                                    if (val == 'default') _setDefault(name);
+                                    if (val == 'delete') _deleteModel(model);
+                                  },
+                                  itemBuilder: (context) => [
+                                    if (!isDefault)
+                                      const PopupMenuItem(
+                                        value: 'default',
+                                        child: Text('Set as default'),
+                                      ),
+                                    const PopupMenuItem(
+                                      value: 'delete',
+                                      child: Text(
+                                        'Delete model',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            )
-                          : ListView.builder(
-                              itemCount: _models.length,
-                              itemBuilder: (ctx, i) {
-                                final model = _models[i];
-                                final name = model.name ?? 'unknown';
-                                final size = model.size ?? 0;
-                                final isDefault = name == _defaultModelName;
-
-                                return Card(
-                                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                                  child: ListTile(
-                                    leading: Icon(
-                                      Icons.smart_toy_rounded,
-                                      color: isDefault ? colors.primary : colors.onSurface.withValues(alpha: 0.5),
-                                    ),
-                                    title: Row(
-                                      children: [
-                                        Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                                        if (isDefault) ...[
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: colors.primaryContainer,
-                                              borderRadius: BorderRadius.circular(4),
-                                            ),
-                                            child: Text(
-                                              'Default',
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: colors.onPrimaryContainer,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                    subtitle: Text(_formatBytes(size)),
-                                    trailing: PopupMenuButton<String>(
-                                      onSelected: (val) {
-                                        if (val == 'default') _setDefault(name);
-                                        if (val == 'delete') _deleteModel(model);
-                                      },
-                                      itemBuilder: (context) => [
-                                        if (!isDefault)
-                                          const PopupMenuItem(
-                                            value: 'default',
-                                            child: Text('Set as default'),
-                                          ),
-                                        const PopupMenuItem(
-                                          value: 'delete',
-                                          child: Text('Delete model', style: TextStyle(color: Colors.red)),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
+                            );
+                          },
+                        ),
                 ),
               ],
             ),
@@ -225,4 +252,3 @@ class _ModelManagerScreenState extends State<ModelManagerScreen> {
     );
   }
 }
-

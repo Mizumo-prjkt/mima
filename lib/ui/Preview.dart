@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class PreviewData {
   final String title;
   final String? textContent; // For text files
-  final String? imagePath;   // For images (mocked as string for now)
+  final String? imagePath; // For images (mocked as string for now)
 
   PreviewData({required this.title, this.textContent, this.imagePath});
 }
@@ -23,7 +23,7 @@ class PreviewScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.5),
+        backgroundColor: Colors.black.withValues(alpha: 0.5),
         elevation: 0,
         title: Text(data?.title ?? 'Preview'),
         leading: IconButton(
