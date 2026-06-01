@@ -40,6 +40,9 @@ jobs:
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: 'stable'
+      
+      - name: Download Package Deps
+        run: flutter pub get
 
       - name: 🧪 Run Tests
-        run: flutter test --no-pub
+        run: flutter test --no-pub -r github
