@@ -141,7 +141,7 @@ log_info "Building Mima for $PLATFORM ($MODE)..."
 
 # Run the appropriate flutter build command
 # Hotpatch: SOlves Android Build Failure
-if [ $PLATFORM -eq "android" ]; then
+if [ $PLATFORM == "android" ]; then
   PLATFORM="apk"
 fi
 
