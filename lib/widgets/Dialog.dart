@@ -46,7 +46,7 @@ class MimaDialog extends StatelessWidget {
       barrierLabel: 'MimaDialog',
       barrierColor: Colors.black45,
       transitionDuration: const Duration(milliseconds: 280),
-      pageBuilder: (ctx, _, __) => MimaDialog(
+      pageBuilder: (ctx, _, _) => MimaDialog(
         title: title,
         content: content,
         actions: actions,
@@ -186,7 +186,7 @@ class MimaDialog extends StatelessWidget {
                   ],
 
                   // ---- body -------------------------------------------------
-                  if (content != null) content!,
+                  ?content,
 
                   // ---- actions ----------------------------------------------
                   if (actions != null && actions!.isNotEmpty) ...[
