@@ -108,6 +108,11 @@ class _MainMenuScreenState extends State<MainMenuScreen>
               ? ChatView(
                   chatId: _filteredChats[_selectedIndex!].session.id.toString(),
                   onChatUpdated: _loadChats,
+                  onSessionDeleted: () {
+                    setState(() {
+                      _selectedIndex = null;
+                    });
+                  },
                 )
               : _buildDesktopEmptyState(),
         ),

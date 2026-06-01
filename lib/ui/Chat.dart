@@ -33,12 +33,14 @@ class ChatView extends StatefulWidget {
   final String? chatId;
   final bool showBackButton;
   final VoidCallback? onChatUpdated;
+  final VoidCallback? onSessionDeleted;
 
   const ChatView({
     super.key,
     this.chatId,
     this.showBackButton = false,
     this.onChatUpdated,
+    this.onSessionDeleted,
   });
 
   @override
@@ -57,7 +59,6 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
   List<ChatMessage> _messages = [];
   List<String> _modelsList = [];
 
-  // typing indicator animation
   late final AnimationController _dotsCtrl;
 
   @override
@@ -119,6 +120,11 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
           _selectedModel = session.modelName;
         });
         _scrollToBottom();
+      }
+    } else {
+      // Session was deleted, navigate back if possible
+      if (mounted && widget.showBackButton) {
+        Navigator.of(context).pop();
       }
     }
   }
@@ -375,12 +381,16 @@ onSelected: (v) async {
                     confirmColor: colors.error,
                   );
                   if (confirm && mounted && _session != null) {
+                    final shouldPop = widget.showBackButton;
                     await MimaStore.instance.deleteSession(_session!.id);
+                    setState(() {
+                      _session = null;
+                      _messages = [];
+                    });
                     widget.onChatUpdated?.call();
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    } else {
-                      Navigator.pushReplacementNamed(context, '/main');
+                    widget.onSessionDeleted?.call();
+                    if (mounted && shouldPop) {
+                      Navigator.maybePop(context);
                     }
                   }
                 } else if (v == 'export') {

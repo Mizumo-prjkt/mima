@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'store/store.dart';
 
+import 'ui/SplashBoot.dart';
 import 'ui/Welcome.dart';
 import 'ui/Setup.dart';
 import 'ui/MainMenu.dart';
@@ -118,7 +119,7 @@ class MimaApp extends StatelessWidget {
           themeMode: currentMode,
           darkTheme: _buildDarkTheme(),
           theme: _buildLightTheme(),
-          initialRoute: '/welcome',
+          initialRoute: '/splash',
           onGenerateRoute: _onGenerateRoute,
           builder: (context, child) {
             return Column(
@@ -161,6 +162,8 @@ class MimaApp extends StatelessWidget {
         page = const AboutScreen();
       case '/diagnostics':
         page = const HardwareDiagnosticsScreen();
+      case '/splash':
+        page = const SplashBootScreen();
       default:
         page = const WelcomeScreen();
     }
