@@ -27,9 +27,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
-    _pulse = Tween<double>(begin: 0.92, end: 1.06).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
-    );
+    _pulse = Tween<double>(
+      begin: 0.92,
+      end: 1.06,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
 
     // One-shot entry animation
     _entryCtrl = AnimationController(
@@ -40,8 +41,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     _slide = Tween<Offset>(
       begin: const Offset(0, 0.12),
       end: Offset.zero,
-    ).animate(
-        CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOutCubic));
+    ).animate(CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOutCubic));
 
     _entryCtrl.forward();
   }
@@ -149,7 +149,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                       // ---------- tagline ----------
                       Text(
-                        'Your local AI companion',
+                        'Your local AI client companion',
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: colors.onSurface.withOpacity(0.55),
                           letterSpacing: 0.5,
@@ -173,8 +173,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Get Started',
-                                  style: TextStyle(fontSize: 17)),
+                              Text(
+                                'Get Started',
+                                style: TextStyle(fontSize: 17),
+                              ),
                               SizedBox(width: 8),
                               Icon(Icons.arrow_forward_rounded, size: 20),
                             ],

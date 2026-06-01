@@ -125,4 +125,96 @@ class OllamaService {
       }
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Diagnostics helpers
+  // ---------------------------------------------------------------------------
+
+  /// Returns the Ollama server version string.
+  Future<String?> getServerVersion() async {
+    try {
+      final client = await getClient();
+      final res = await client.version.get().timeout(const Duration(seconds: 5));
+      return res.version;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Returns currently running/loaded models with VRAM usage info.
+  Future<List<ollama.RunningModel>> getRunningModels() async {
+    try {
+      final client = await getClient();
+      final res = await client.models.ps().timeout(const Duration(seconds: 5));
+      return res.models ?? [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Shows detailed info for a specific model (params, quant, capabilities).
+  Future<ollama.ShowResponse?> showModelInfo(String modelName) async {
+    try {
+      final client = await getClient();
+      final res = await client.models.show(
+        request: ollama.ShowRequest(model: modelName),
+      ).timeout(const Duration(seconds: 10));
+      return res;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Benchmarks a model by sending a fixed prompt and measuring tokens/sec.
+  /// Returns a [BenchmarkResult] with timing and token count.
+  Future<BenchmarkResult> benchmarkModel(String modelName) async {
+    const benchmarkPrompt = 'Explain quantum computing in exactly 100 words.';
+    final client = await getClient();
+
+    final request = ollama.ChatRequest(
+      model: modelName,
+      messages: [ollama.ChatMessage.user(benchmarkPrompt)],
+      options: const ollama.ModelOptions(temperature: 0.7),
+    );
+
+    final stopwatch = Stopwatch()..start();
+    int tokenCount = 0;
+    final buffer = StringBuffer();
+
+    final stream = client.chat.createStream(request: request);
+    await for (final chunk in stream) {
+      final text = chunk.message?.content;
+      if (text != null && text.isNotEmpty) {
+        tokenCount++;
+        buffer.write(text);
+      }
+    }
+    stopwatch.stop();
+
+    final elapsedSec = stopwatch.elapsedMilliseconds / 1000.0;
+    return BenchmarkResult(
+      modelName: modelName,
+      tokenCount: tokenCount,
+      elapsedSeconds: elapsedSec,
+      tokensPerSecond: elapsedSec > 0 ? tokenCount / elapsedSec : 0,
+      response: buffer.toString(),
+    );
+  }
+}
+
+/// Result of a model benchmark run.
+class BenchmarkResult {
+  final String modelName;
+  final int tokenCount;
+  final double elapsedSeconds;
+  final double tokensPerSecond;
+  final String response;
+
+  const BenchmarkResult({
+    required this.modelName,
+    required this.tokenCount,
+    required this.elapsedSeconds,
+    required this.tokensPerSecond,
+    required this.response,
+  });
 }

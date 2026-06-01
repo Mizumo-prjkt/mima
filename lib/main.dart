@@ -16,6 +16,7 @@ import 'ui/Preview.dart';
 import 'ui/ModelBrowser.dart';
 import 'ui/ModelManager.dart';
 import 'ui/About.dart';
+import 'ui/HardwareDiagnostics.dart';
 import 'widgets/TitleBar.dart';
 
 void main(List<String> args) async {
@@ -158,6 +159,8 @@ class MimaApp extends StatelessWidget {
         page = const ModelManagerScreen();
       case '/about':
         page = const AboutScreen();
+      case '/diagnostics':
+        page = const HardwareDiagnosticsScreen();
       default:
         page = const WelcomeScreen();
     }

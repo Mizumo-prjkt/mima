@@ -105,7 +105,10 @@ class _MainMenuScreenState extends State<MainMenuScreen>
         // main content
         Expanded(
           child: _selectedIndex != null
-              ? ChatView(chatId: _filteredChats[_selectedIndex!].session.id.toString())
+              ? ChatView(
+                  chatId: _filteredChats[_selectedIndex!].session.id.toString(),
+                  onChatUpdated: _loadChats,
+                )
               : _buildDesktopEmptyState(),
         ),
       ],
@@ -391,9 +394,10 @@ class _MainMenuScreenState extends State<MainMenuScreen>
   // ---- actions --------------------------------------------------------------
 
   Future<void> _createNewChat() async {
+    final defaultModelName = await MimaStore.instance.getSetting('default_model') ?? 'llama3.2';
     final newSession = await MimaStore.instance.createSession(
       'New conversation',
-      'llama3.2', // default model
+      defaultModelName,
     );
     await _loadChats();
     if (mounted) {
@@ -525,12 +529,22 @@ class _ChatListTile extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      _timeAgo(chat.lastMessage?.timestamp ?? chat.session.createdAt),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontSize: 11,
-                        color: colors.onSurface.withOpacity(0.3),
-                      ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (chat.session.isPinned)
+                          Icon(Icons.push_pin_rounded,
+                              size: 11, color: colors.primary),
+                        if (chat.session.isPinned)
+                          const SizedBox(width: 4),
+                        Text(
+                          _timeAgo(chat.lastMessage?.timestamp ?? chat.session.createdAt),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 11,
+                            color: colors.onSurface.withOpacity(0.3),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(

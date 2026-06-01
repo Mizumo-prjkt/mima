@@ -26,6 +26,7 @@ class ChatSessions extends Table {
       text().nullable()(); // Null means use model default
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get isPinned => boolean().withDefault(const Constant(false))();
 }
 
 // (Keep ChatMessages exact same as before)
@@ -43,5 +44,14 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.addColumn(chatSessions, chatSessions.isPinned);
+          }
+        },
+      );
 }

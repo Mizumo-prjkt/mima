@@ -159,8 +159,11 @@ class _AboutScreenState extends State<AboutScreen>
                                   color: colors.tertiary.withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Icon(Icons.shield_outlined,
-                                    color: colors.tertiary, size: 20),
+                                child: Icon(
+                                  Icons.shield_outlined,
+                                  color: colors.tertiary,
+                                  size: 20,
+                                ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -213,10 +216,7 @@ class _AboutScreenState extends State<AboutScreen>
                   const SizedBox(height: 24),
 
                   // ──────────── Flutter & Dart Runtime ────────────
-                  _SectionHeader(
-                    title: 'Runtime',
-                    icon: Icons.memory_rounded,
-                  ),
+                  _SectionHeader(title: 'Runtime', icon: Icons.memory_rounded),
                   _AboutCard(
                     child: Column(
                       children: [
@@ -227,14 +227,19 @@ class _AboutScreenState extends State<AboutScreen>
                               color: const Color(0xFF027DFD).withOpacity(0.12),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(Icons.flutter_dash_rounded,
-                                color: Color(0xFF027DFD), size: 20),
+                            child: const Icon(
+                              Icons.flutter_dash_rounded,
+                              color: Color(0xFF027DFD),
+                              size: 20,
+                            ),
                           ),
                           title: const Text('Flutter'),
                           subtitle: const Text('UI toolkit by Google'),
                           trailing: Chip(
-                            label: Text('SDK',
-                                style: theme.textTheme.labelSmall),
+                            label: Text(
+                              'SDK',
+                              style: theme.textTheme.labelSmall,
+                            ),
                             visualDensity: VisualDensity.compact,
                           ),
                         ),
@@ -246,14 +251,19 @@ class _AboutScreenState extends State<AboutScreen>
                               color: const Color(0xFF0175C2).withOpacity(0.12),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(Icons.code_rounded,
-                                color: Color(0xFF0175C2), size: 20),
+                            child: const Icon(
+                              Icons.code_rounded,
+                              color: Color(0xFF0175C2),
+                              size: 20,
+                            ),
                           ),
                           title: const Text('Dart'),
                           subtitle: const Text('Programming language'),
                           trailing: Chip(
-                            label: Text('SDK ≥ 3.12',
-                                style: theme.textTheme.labelSmall),
+                            label: Text(
+                              'SDK ≥ 3.12',
+                              style: theme.textTheme.labelSmall,
+                            ),
                             visualDensity: VisualDensity.compact,
                           ),
                         ),
@@ -283,8 +293,11 @@ class _AboutScreenState extends State<AboutScreen>
                                   colors: [colors.primary, colors.tertiary],
                                 ),
                               ),
-                              child: Icon(Icons.auto_awesome_rounded,
-                                  size: 28, color: colors.onPrimary),
+                              child: Icon(
+                                Icons.auto_awesome_rounded,
+                                size: 28,
+                                color: colors.onPrimary,
+                              ),
                             ),
                           ),
                         );
@@ -326,8 +339,11 @@ class _AboutScreenState extends State<AboutScreen>
                 ),
               ],
             ),
-            child: Icon(Icons.auto_awesome_rounded,
-                size: 38, color: colors.onPrimary),
+            child: Icon(
+              Icons.auto_awesome_rounded,
+              size: 38,
+              color: colors.onPrimary,
+            ),
           ),
           const SizedBox(height: 16),
           ShaderMask(
@@ -360,7 +376,7 @@ class _AboutScreenState extends State<AboutScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Your local AI companion · Powered by Ollama',
+            'Your local AI client companion · Powered by Ollama',
             style: theme.textTheme.bodySmall?.copyWith(
               color: colors.onSurface.withOpacity(0.5),
             ),
@@ -449,8 +465,10 @@ class _PackageTile extends StatelessWidget {
       title: Row(
         children: [
           Flexible(
-            child: Text(pkg.name,
-                style: const TextStyle(fontWeight: FontWeight.w600)),
+            child: Text(
+              pkg.name,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
           const SizedBox(width: 8),
           Container(

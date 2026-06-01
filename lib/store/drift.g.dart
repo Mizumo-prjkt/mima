@@ -289,6 +289,21 @@ class $ChatSessionsTable extends ChatSessions
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _isPinnedMeta = const VerificationMeta(
+    'isPinned',
+  );
+  @override
+  late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
+    'is_pinned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_pinned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -297,6 +312,7 @@ class $ChatSessionsTable extends ChatSessions
     temperature,
     systemPrompt,
     createdAt,
+    isPinned,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -353,6 +369,12 @@ class $ChatSessionsTable extends ChatSessions
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('is_pinned')) {
+      context.handle(
+        _isPinnedMeta,
+        isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta),
+      );
+    }
     return context;
   }
 
@@ -386,6 +408,10 @@ class $ChatSessionsTable extends ChatSessions
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      isPinned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_pinned'],
+      )!,
     );
   }
 
@@ -402,6 +428,7 @@ class ChatSession extends DataClass implements Insertable<ChatSession> {
   final double temperature;
   final String? systemPrompt;
   final DateTime createdAt;
+  final bool isPinned;
   const ChatSession({
     required this.id,
     required this.title,
@@ -409,6 +436,7 @@ class ChatSession extends DataClass implements Insertable<ChatSession> {
     required this.temperature,
     this.systemPrompt,
     required this.createdAt,
+    required this.isPinned,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -421,6 +449,7 @@ class ChatSession extends DataClass implements Insertable<ChatSession> {
       map['system_prompt'] = Variable<String>(systemPrompt);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['is_pinned'] = Variable<bool>(isPinned);
     return map;
   }
 
@@ -434,6 +463,7 @@ class ChatSession extends DataClass implements Insertable<ChatSession> {
           ? const Value.absent()
           : Value(systemPrompt),
       createdAt: Value(createdAt),
+      isPinned: Value(isPinned),
     );
   }
 
@@ -449,6 +479,7 @@ class ChatSession extends DataClass implements Insertable<ChatSession> {
       temperature: serializer.fromJson<double>(json['temperature']),
       systemPrompt: serializer.fromJson<String?>(json['systemPrompt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      isPinned: serializer.fromJson<bool>(json['isPinned']),
     );
   }
   @override
@@ -461,6 +492,7 @@ class ChatSession extends DataClass implements Insertable<ChatSession> {
       'temperature': serializer.toJson<double>(temperature),
       'systemPrompt': serializer.toJson<String?>(systemPrompt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'isPinned': serializer.toJson<bool>(isPinned),
     };
   }
 
@@ -471,6 +503,7 @@ class ChatSession extends DataClass implements Insertable<ChatSession> {
     double? temperature,
     Value<String?> systemPrompt = const Value.absent(),
     DateTime? createdAt,
+    bool? isPinned,
   }) => ChatSession(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -478,6 +511,7 @@ class ChatSession extends DataClass implements Insertable<ChatSession> {
     temperature: temperature ?? this.temperature,
     systemPrompt: systemPrompt.present ? systemPrompt.value : this.systemPrompt,
     createdAt: createdAt ?? this.createdAt,
+    isPinned: isPinned ?? this.isPinned,
   );
   ChatSession copyWithCompanion(ChatSessionsCompanion data) {
     return ChatSession(
@@ -491,6 +525,7 @@ class ChatSession extends DataClass implements Insertable<ChatSession> {
           ? data.systemPrompt.value
           : this.systemPrompt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
     );
   }
 
@@ -502,14 +537,22 @@ class ChatSession extends DataClass implements Insertable<ChatSession> {
           ..write('modelName: $modelName, ')
           ..write('temperature: $temperature, ')
           ..write('systemPrompt: $systemPrompt, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('isPinned: $isPinned')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, modelName, temperature, systemPrompt, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    modelName,
+    temperature,
+    systemPrompt,
+    createdAt,
+    isPinned,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -519,7 +562,8 @@ class ChatSession extends DataClass implements Insertable<ChatSession> {
           other.modelName == this.modelName &&
           other.temperature == this.temperature &&
           other.systemPrompt == this.systemPrompt &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.isPinned == this.isPinned);
 }
 
 class ChatSessionsCompanion extends UpdateCompanion<ChatSession> {
@@ -529,6 +573,7 @@ class ChatSessionsCompanion extends UpdateCompanion<ChatSession> {
   final Value<double> temperature;
   final Value<String?> systemPrompt;
   final Value<DateTime> createdAt;
+  final Value<bool> isPinned;
   const ChatSessionsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -536,6 +581,7 @@ class ChatSessionsCompanion extends UpdateCompanion<ChatSession> {
     this.temperature = const Value.absent(),
     this.systemPrompt = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.isPinned = const Value.absent(),
   });
   ChatSessionsCompanion.insert({
     this.id = const Value.absent(),
@@ -544,6 +590,7 @@ class ChatSessionsCompanion extends UpdateCompanion<ChatSession> {
     this.temperature = const Value.absent(),
     this.systemPrompt = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.isPinned = const Value.absent(),
   }) : title = Value(title),
        modelName = Value(modelName);
   static Insertable<ChatSession> custom({
@@ -553,6 +600,7 @@ class ChatSessionsCompanion extends UpdateCompanion<ChatSession> {
     Expression<double>? temperature,
     Expression<String>? systemPrompt,
     Expression<DateTime>? createdAt,
+    Expression<bool>? isPinned,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -561,6 +609,7 @@ class ChatSessionsCompanion extends UpdateCompanion<ChatSession> {
       if (temperature != null) 'temperature': temperature,
       if (systemPrompt != null) 'system_prompt': systemPrompt,
       if (createdAt != null) 'created_at': createdAt,
+      if (isPinned != null) 'is_pinned': isPinned,
     });
   }
 
@@ -571,6 +620,7 @@ class ChatSessionsCompanion extends UpdateCompanion<ChatSession> {
     Value<double>? temperature,
     Value<String?>? systemPrompt,
     Value<DateTime>? createdAt,
+    Value<bool>? isPinned,
   }) {
     return ChatSessionsCompanion(
       id: id ?? this.id,
@@ -579,6 +629,7 @@ class ChatSessionsCompanion extends UpdateCompanion<ChatSession> {
       temperature: temperature ?? this.temperature,
       systemPrompt: systemPrompt ?? this.systemPrompt,
       createdAt: createdAt ?? this.createdAt,
+      isPinned: isPinned ?? this.isPinned,
     );
   }
 
@@ -603,6 +654,9 @@ class ChatSessionsCompanion extends UpdateCompanion<ChatSession> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (isPinned.present) {
+      map['is_pinned'] = Variable<bool>(isPinned.value);
+    }
     return map;
   }
 
@@ -614,7 +668,8 @@ class ChatSessionsCompanion extends UpdateCompanion<ChatSession> {
           ..write('modelName: $modelName, ')
           ..write('temperature: $temperature, ')
           ..write('systemPrompt: $systemPrompt, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('isPinned: $isPinned')
           ..write(')'))
         .toString();
   }
@@ -1145,6 +1200,7 @@ typedef $$ChatSessionsTableCreateCompanionBuilder =
       Value<double> temperature,
       Value<String?> systemPrompt,
       Value<DateTime> createdAt,
+      Value<bool> isPinned,
     });
 typedef $$ChatSessionsTableUpdateCompanionBuilder =
     ChatSessionsCompanion Function({
@@ -1154,6 +1210,7 @@ typedef $$ChatSessionsTableUpdateCompanionBuilder =
       Value<double> temperature,
       Value<String?> systemPrompt,
       Value<DateTime> createdAt,
+      Value<bool> isPinned,
     });
 
 final class $$ChatSessionsTableReferences
@@ -1221,6 +1278,11 @@ class $$ChatSessionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> chatMessagesRefs(
     Expression<bool> Function($$ChatMessagesTableFilterComposer f) f,
   ) {
@@ -1285,6 +1347,11 @@ class $$ChatSessionsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ChatSessionsTableAnnotationComposer
@@ -1317,6 +1384,9 @@ class $$ChatSessionsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPinned =>
+      $composableBuilder(column: $table.isPinned, builder: (column) => column);
 
   Expression<T> chatMessagesRefs<T extends Object>(
     Expression<T> Function($$ChatMessagesTableAnnotationComposer a) f,
@@ -1378,6 +1448,7 @@ class $$ChatSessionsTableTableManager
                 Value<double> temperature = const Value.absent(),
                 Value<String?> systemPrompt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
               }) => ChatSessionsCompanion(
                 id: id,
                 title: title,
@@ -1385,6 +1456,7 @@ class $$ChatSessionsTableTableManager
                 temperature: temperature,
                 systemPrompt: systemPrompt,
                 createdAt: createdAt,
+                isPinned: isPinned,
               ),
           createCompanionCallback:
               ({
@@ -1394,6 +1466,7 @@ class $$ChatSessionsTableTableManager
                 Value<double> temperature = const Value.absent(),
                 Value<String?> systemPrompt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
               }) => ChatSessionsCompanion.insert(
                 id: id,
                 title: title,
@@ -1401,6 +1474,7 @@ class $$ChatSessionsTableTableManager
                 temperature: temperature,
                 systemPrompt: systemPrompt,
                 createdAt: createdAt,
+                isPinned: isPinned,
               ),
           withReferenceMapper: (p0) => p0
               .map(

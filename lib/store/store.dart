@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'drift.dart';
 
@@ -28,7 +29,10 @@ class MimaStore {
 
   Future<List<ChatSession>> loadSessions() async {
     return (db.select(db.chatSessions)
-          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+          ..orderBy([
+            (t) => OrderingTerm.desc(t.isPinned),
+            (t) => OrderingTerm.desc(t.createdAt),
+          ]))
         .get();
   }
 
@@ -68,6 +72,18 @@ class MimaStore {
   Future<void> updateSessionModel(int id, String modelName) async {
     await (db.update(db.chatSessions)..where((t) => t.id.equals(id))).write(
       ChatSessionsCompanion(modelName: Value(modelName)),
+    );
+  }
+
+  Future<void> updateSessionTitle(int id, String title) async {
+    await (db.update(db.chatSessions)..where((t) => t.id.equals(id))).write(
+      ChatSessionsCompanion(title: Value(title)),
+    );
+  }
+
+  Future<void> updateSessionPinned(int id, bool pinned) async {
+    await (db.update(db.chatSessions)..where((t) => t.id.equals(id))).write(
+      ChatSessionsCompanion(isPinned: Value(pinned)),
     );
   }
 
@@ -123,6 +139,82 @@ class MimaStore {
   Future<void> clearChatDatabase() async {
     await db.delete(db.chatMessages).go();
     await db.delete(db.chatSessions).go();
+  }
+
+  Future<String> exportBackupJson() async {
+    final sessions = await loadSessions();
+    final List<Map<String, dynamic>> sessionsJson = [];
+
+    for (final s in sessions) {
+      final messages = await loadMessages(s.id);
+      sessionsJson.add({
+        'title': s.title,
+        'modelName': s.modelName,
+        'temperature': s.temperature,
+        'systemPrompt': s.systemPrompt,
+        'isPinned': s.isPinned,
+        'messages': messages.map((m) => {
+          'role': m.role,
+          'content': m.content,
+          'timestamp': m.timestamp.toIso8601String(),
+        }).toList(),
+      });
+    }
+
+    final backup = {
+      'version': 1,
+      'sessions': sessionsJson,
+    };
+
+    return jsonEncode(backup);
+  }
+
+  Future<void> importBackupJson(String jsonString) async {
+    final data = jsonDecode(jsonString);
+    if (data is! Map<String, dynamic> || data['sessions'] is! List) {
+      throw const FormatException('Invalid backup file format');
+    }
+
+    final sessionsList = data['sessions'] as List;
+    for (final sObj in sessionsList) {
+      if (sObj is! Map<String, dynamic>) continue;
+      final title = sObj['title'] as String? ?? 'Imported Chat';
+      final modelName = sObj['modelName'] as String? ?? 'llama3.2';
+      final temperature = (sObj['temperature'] as num?)?.toDouble() ?? 0.7;
+      final systemPrompt = sObj['systemPrompt'] as String?;
+      final isPinned = sObj['isPinned'] as bool? ?? false;
+
+      // Insert session
+      final sessionId = await db.into(db.chatSessions).insert(
+        ChatSessionsCompanion.insert(
+          title: title,
+          modelName: modelName,
+          temperature: Value(temperature),
+          systemPrompt: Value(systemPrompt),
+          isPinned: Value(isPinned),
+        ),
+      );
+
+      final messages = sObj['messages'] as List? ?? [];
+      for (final mObj in messages) {
+        if (mObj is! Map<String, dynamic>) continue;
+        final role = mObj['role'] as String? ?? 'user';
+        final content = mObj['content'] as String? ?? '';
+        final timestampStr = mObj['timestamp'] as String?;
+        final timestamp = timestampStr != null 
+            ? DateTime.tryParse(timestampStr) ?? DateTime.now() 
+            : DateTime.now();
+
+        await db.into(db.chatMessages).insert(
+          ChatMessagesCompanion.insert(
+            sessionId: sessionId,
+            role: role,
+            content: content,
+            timestamp: Value(timestamp),
+          ),
+        );
+      }
+    }
   }
 }
 

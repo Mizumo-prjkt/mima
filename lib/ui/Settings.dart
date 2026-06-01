@@ -4,6 +4,8 @@ import '../main.dart';
 import '../versioning/versioning_aware.dart';
 import '../store/store.dart';
 import '../ollama/ollama_dart.dart';
+import 'dart:io' show Platform, File;
+import 'package:path/path.dart' as p;
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -18,6 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _enableDeveloperSettings = false;
   bool _enableImageAttachments = false;
   String _serverUrl = OllamaService.defaultServerUrl;
+  bool _enterSendsMessage = true;
 
   @override
   void initState() {
@@ -27,9 +30,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadSettings() async {
     final url = await MimaStore.instance.getSetting('server_url');
-    if (url != null && mounted) {
+    final enterSends = await MimaStore.instance.getSetting('enter_sends_message');
+    if (mounted) {
       setState(() {
-        _serverUrl = url;
+        if (url != null) _serverUrl = url;
+        _enterSendsMessage = enterSends != 'false';
       });
     }
   }
@@ -109,6 +114,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         );
                       },
                     ),
+                    const Divider(),
+                    ListTile(
+                      leading:
+                          const Icon(Icons.speed_rounded, color: Colors.grey),
+                      title: const Text('Hardware Diagnostics'),
+                      subtitle: const Text('Probe server VRAM & benchmark inference'),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => Navigator.pushNamed(context, '/diagnostics'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _SectionHeader(title: 'Chat Options', icon: Icons.chat_outlined),
+                _SettingsCard(
+                  children: [
+                    SwitchListTile(
+                      secondary: const Icon(Icons.keyboard_return_rounded, color: Colors.grey),
+                      title: const Text('Enter Key Sends Message'),
+                      subtitle: const Text('Press Enter to send, Shift+Enter for a new line'),
+                      value: _enterSendsMessage,
+                      onChanged: (v) async {
+                        await MimaStore.instance.setSetting('enter_sends_message', v.toString());
+                        setState(() {
+                          _enterSendsMessage = v;
+                        });
+                      },
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -173,7 +205,79 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: const Text('Import Chats'),
                       subtitle: const Text('Restore from backup file'),
                       onTap: () {
-                        // logic to import
+                        final home = Platform.isWindows
+                            ? Platform.environment['USERPROFILE']
+                            : Platform.environment['HOME'];
+                        final defaultPath = home != null
+                            ? p.join(home, 'mima_backup.json')
+                            : 'mima_backup.json';
+                        final pathController =
+                            TextEditingController(text: defaultPath);
+
+                        MimaDialog.show(
+                          context: context,
+                          title: 'Import Chats',
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                  'Enter the absolute path to your backup JSON file:'),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: pathController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Backup File Path',
+                                  hintText: '/path/to/backup.json',
+                                ),
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            FilledButton(
+                              onPressed: () async {
+                                final filePath = pathController.text.trim();
+                                if (filePath.isEmpty) return;
+
+                                try {
+                                  final file = File(filePath);
+                                  if (!await file.exists()) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text('Error: File does not exist')),
+                                      );
+                                    }
+                                    return;
+                                  }
+
+                                  final content = await file.readAsString();
+                                  await MimaStore.instance.importBackupJson(content);
+
+                                  if (mounted) {
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text('Chats imported successfully!')),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text('Failed to import: $e')),
+                                    );
+                                  }
+                                }
+                              },
+                              child: const Text('Import'),
+                            ),
+                          ],
+                        );
                       },
                     ),
                     const Divider(),
@@ -183,7 +287,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: const Text('Export Chats'),
                       subtitle: const Text('Save all chats to a backup file'),
                       onTap: () {
-                        // logic to export
+                        final home = Platform.isWindows
+                            ? Platform.environment['USERPROFILE']
+                            : Platform.environment['HOME'];
+                        final defaultPath = home != null
+                            ? p.join(home, 'mima_backup.json')
+                            : 'mima_backup.json';
+                        final pathController =
+                            TextEditingController(text: defaultPath);
+
+                        MimaDialog.show(
+                          context: context,
+                          title: 'Export Chats',
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                  'Enter the absolute path where you want to save the backup JSON file:'),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: pathController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Backup File Path',
+                                  hintText: '/path/to/backup.json',
+                                ),
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            FilledButton(
+                              onPressed: () async {
+                                final filePath = pathController.text.trim();
+                                if (filePath.isEmpty) return;
+
+                                try {
+                                  final file = File(filePath);
+                                  final directory = file.parent;
+                                  if (!await directory.exists()) {
+                                    await directory.create(recursive: true);
+                                  }
+
+                                  final jsonString =
+                                      await MimaStore.instance.exportBackupJson();
+                                  await file.writeAsString(jsonString);
+
+                                  if (mounted) {
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Chats exported successfully to $filePath!')),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text('Failed to export: $e')),
+                                    );
+                                  }
+                                }
+                              },
+                              child: const Text('Export'),
+                            ),
+                          ],
+                        );
                       },
                     ),
                     const Divider(),

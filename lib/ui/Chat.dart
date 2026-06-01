@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
+import 'dart:io' show Platform, File;
+import 'package:path/path.dart' as p;
 import '../store/store.dart';
 import '../store/drift.dart';
 import '../ollama/ollama_dart.dart';
+import '../widgets/Dialog.dart';
 import 'package:ollama_dart/ollama_dart.dart' as ollama;
 
 // =============================================================================
@@ -17,10 +20,7 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ChatView(
-        chatId: chatId,
-        showBackButton: Navigator.canPop(context),
-      ),
+      body: ChatView(chatId: chatId, showBackButton: Navigator.canPop(context)),
     );
   }
 }
@@ -32,8 +32,14 @@ class ChatScreen extends StatelessWidget {
 class ChatView extends StatefulWidget {
   final String? chatId;
   final bool showBackButton;
+  final VoidCallback? onChatUpdated;
 
-  const ChatView({super.key, this.chatId, this.showBackButton = false});
+  const ChatView({
+    super.key,
+    this.chatId,
+    this.showBackButton = false,
+    this.onChatUpdated,
+  });
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -45,7 +51,8 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
   final _inputFocus = FocusNode();
   String _selectedModel = 'llama3.2';
   bool _isGenerating = false;
-  
+  bool _enterSendsMessage = true;
+
   ChatSession? _session;
   List<ChatMessage> _messages = [];
   List<String> _modelsList = [];
@@ -62,6 +69,18 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
     )..repeat();
     _loadSessionAndHistory();
     _loadAvailableModels();
+    _loadEnterSendsSetting();
+  }
+
+  Future<void> _loadEnterSendsSetting() async {
+    final enterSends = await MimaStore.instance.getSetting(
+      'enter_sends_message',
+    );
+    if (mounted) {
+      setState(() {
+        _enterSendsMessage = enterSends != 'false';
+      });
+    }
   }
 
   @override
@@ -86,7 +105,10 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
     if (id == null) return;
 
     final sessions = await MimaStore.instance.loadSessions();
-    final session = sessions.cast<ChatSession?>().firstWhere((s) => s?.id == id, orElse: () => null);
+    final session = sessions.cast<ChatSession?>().firstWhere(
+      (s) => s?.id == id,
+      orElse: () => null,
+    );
 
     if (session != null) {
       final history = await MimaStore.instance.loadMessages(id);
@@ -105,7 +127,10 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
     final models = await OllamaService.instance.listModels();
     if (mounted) {
       setState(() {
-        _modelsList = models.map((m) => m.model ?? m.name ?? '').where((n) => n.isNotEmpty).toList();
+        _modelsList = models
+            .map((m) => m.model ?? m.name ?? '')
+            .where((n) => n.isNotEmpty)
+            .toList();
       });
     }
   }
@@ -130,7 +155,11 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
 
     final sessionId = _session!.id;
 
-    final userMsg = await MimaStore.instance.addMessage(sessionId, 'user', text);
+    final userMsg = await MimaStore.instance.addMessage(
+      sessionId,
+      'user',
+      text,
+    );
     if (mounted) {
       setState(() {
         _messages.add(userMsg);
@@ -164,13 +193,15 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
         setState(() {
           assistantContent += chunk;
           if (assistantMsgIndex == null) {
-            _messages.add(ChatMessage(
-              id: -1,
-              sessionId: sessionId,
-              role: 'assistant',
-              content: assistantContent,
-              timestamp: DateTime.now(),
-            ));
+            _messages.add(
+              ChatMessage(
+                id: -1,
+                sessionId: sessionId,
+                role: 'assistant',
+                content: assistantContent,
+                timestamp: DateTime.now(),
+              ),
+            );
             assistantMsgIndex = _messages.length - 1;
           } else {
             _messages[assistantMsgIndex!] = ChatMessage(
@@ -186,7 +217,11 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
       }
 
       if (assistantContent.isNotEmpty) {
-        final savedMsg = await MimaStore.instance.addMessage(sessionId, 'assistant', assistantContent);
+        final savedMsg = await MimaStore.instance.addMessage(
+          sessionId,
+          'assistant',
+          assistantContent,
+        );
         if (mounted) {
           setState(() {
             _isGenerating = false;
@@ -208,9 +243,9 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
         setState(() {
           _isGenerating = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -275,8 +310,10 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
               borderRadius: BorderRadius.circular(10),
               onTap: () => _showModelSelector(context),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: colors.primary.withOpacity(0.10),
                   borderRadius: BorderRadius.circular(10),
@@ -284,8 +321,11 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.smart_toy_rounded,
-                        size: 16, color: colors.primary),
+                    Icon(
+                      Icons.smart_toy_rounded,
+                      size: 16,
+                      color: colors.primary,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       _selectedModel,
@@ -295,8 +335,11 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Icon(Icons.keyboard_arrow_down_rounded,
-                        size: 18, color: colors.primary),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 18,
+                      color: colors.primary,
+                    ),
                   ],
                 ),
               ),
@@ -307,11 +350,138 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
             // overflow menu
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert_rounded, size: 20),
-              onSelected: (v) {},
+onSelected: (v) async {
+                if (v == 'clear') {
+                  final confirm = await MimaDialog.confirm(
+                    context: context,
+                    title: 'Clear Chat',
+                    message:
+                        'Are you sure you want to clear all messages in this conversation?',
+                  );
+                  if (confirm && mounted && _session != null) {
+                    final db = MimaStore.instance.db;
+                    await (db.delete(
+                      db.chatMessages,
+                    )..where((t) => t.sessionId.equals(_session!.id))).go();
+                    _loadSessionAndHistory();
+                  }
+                } else if (v == 'delete') {
+                  final confirm = await MimaDialog.confirm(
+                    context: context,
+                    title: 'Delete Conversation',
+                    message:
+                        'Are you sure you want to delete this conversation? This action cannot be undone.',
+                    confirmText: 'Delete',
+                    confirmColor: colors.error,
+                  );
+                  if (confirm && mounted && _session != null) {
+                    await MimaStore.instance.deleteSession(_session!.id);
+                    widget.onChatUpdated?.call();
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    } else {
+                      Navigator.pushReplacementNamed(context, '/main');
+                    }
+                  }
+                } else if (v == 'export') {
+                  final home = Platform.isWindows
+                      ? Platform.environment['USERPROFILE']
+                      : Platform.environment['HOME'];
+                  final defaultPath = home != null
+                      ? p.join(home, 'mima_chat_export.md')
+                      : 'mima_chat_export.md';
+                  final pathController = TextEditingController(
+                    text: defaultPath,
+                  );
+
+                  MimaDialog.show(
+                    context: context,
+                    title: 'Export Chat to Markdown',
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Enter the absolute path where you want to save the chat history as Markdown:',
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: pathController,
+                          decoration: const InputDecoration(
+                            labelText: 'Export Path',
+                            hintText: '/path/to/export.md',
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () async {
+                          final filePath = pathController.text.trim();
+                          if (filePath.isEmpty) return;
+
+                          try {
+                            final file = File(filePath);
+                            final directory = file.parent;
+                            if (!await directory.exists()) {
+                              await directory.create(recursive: true);
+                            }
+
+                            final buffer = StringBuffer();
+                            buffer.writeln(
+                              '# Chat Session: ${_session?.title ?? "Untitled"}',
+                            );
+                            buffer.writeln('Model: $_selectedModel');
+                            buffer.writeln();
+
+                            for (final m in _messages) {
+                              final roleName = m.role == 'user'
+                                  ? 'User'
+                                  : 'Assistant';
+                              buffer.writeln(
+                                '### $roleName (${m.timestamp.toLocal()})',
+                              );
+                              buffer.writeln(m.content);
+                              buffer.writeln();
+                            }
+
+                            await file.writeAsString(buffer.toString());
+
+                            if (mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Chat exported successfully to $filePath!',
+                                  ),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Failed to export: $e')),
+                              );
+                            }
+                          }
+                        },
+                        child: const Text('Export'),
+                      ),
+                    ],
+                  );
+                } else if (v == 'options') {
+                  _showOptionsSheet();
+                }
+              },
               itemBuilder: (_) => const [
+                PopupMenuItem(value: 'options', child: Text('Options')),
                 PopupMenuItem(value: 'clear', child: Text('Clear chat')),
+                PopupMenuItem(value: 'delete', child: Text('Delete conversation')),
                 PopupMenuItem(value: 'export', child: Text('Export chat')),
-                PopupMenuItem(value: 'settings', child: Text('Settings')),
               ],
             ),
           ],
@@ -339,11 +509,14 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Text('Select Model',
-                        style: Theme.of(ctx).textTheme.titleMedium),
+                    child: Text(
+                      'Select Model',
+                      style: Theme.of(ctx).textTheme.titleMedium,
+                    ),
                   ),
                   const SizedBox(height: 12),
-                  for (final model in (_modelsList.isEmpty ? _availableModels : _modelsList))
+                  for (final model
+                      in (_modelsList.isEmpty ? _availableModels : _modelsList))
                     ListTile(
                       leading: Icon(
                         Icons.smart_toy_outlined,
@@ -359,15 +532,22 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
                       onTap: () async {
                         setState(() => _selectedModel = model);
                         if (_session != null) {
-                          await MimaStore.instance.updateSessionModel(_session!.id, model);
+                          await MimaStore.instance.updateSessionModel(
+                            _session!.id,
+                            model,
+                          );
+                          await _loadSessionAndHistory();
+                          widget.onChatUpdated?.call();
                         }
                         Navigator.pop(ctx);
                       },
                     ),
                   const Divider(),
                   ListTile(
-                    leading: Icon(Icons.download_rounded,
-                        color: colors.onSurface.withOpacity(0.6)),
+                    leading: Icon(
+                      Icons.download_rounded,
+                      color: colors.onSurface.withOpacity(0.6),
+                    ),
                     title: const Text('Browse & download models'),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -383,6 +563,144 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
     );
   }
 
+  void _showOptionsSheet() {
+    if (_session == null) return;
+
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    final titleController = TextEditingController(text: _session!.title);
+    final promptController = TextEditingController(
+      text: _session!.systemPrompt ?? '',
+    );
+    double tempValue = _session!.temperature;
+    bool pinValue = _session!.isPinned;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: colors.surfaceContainer,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  20,
+                  20,
+                  MediaQuery.of(context).viewInsets.bottom + 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Conversation Options',
+                      style: theme.textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Conversation Title',
+                        hintText: 'e.g. Coding Help',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Pin Conversation'),
+                      subtitle: const Text(
+                        'Keep this chat at the top of the list',
+                      ),
+                      value: pinValue,
+                      onChanged: (v) {
+                        setSheetState(() {
+                          pinValue = v;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Temperature: ${tempValue.toStringAsFixed(1)}',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    Slider(
+                      value: tempValue,
+                      min: 0.0,
+                      max: 1.5,
+                      divisions: 15,
+                      label: tempValue.toStringAsFixed(1),
+                      onChanged: (v) {
+                        setSheetState(() {
+                          tempValue = v;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: promptController,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        labelText: 'System Prompt',
+                        hintText: 'Leave empty for model default',
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancel'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton(
+                          onPressed: () async {
+                            final newTitle = titleController.text.trim();
+                            if (newTitle.isNotEmpty && _session != null) {
+                              await MimaStore.instance.updateSessionTitle(
+                                _session!.id,
+                                newTitle,
+                              );
+                              await MimaStore.instance.updateSessionPinned(
+                                _session!.id,
+                                pinValue,
+                              );
+                              await MimaStore.instance.updateSessionConfig(
+                                _session!.id,
+                                temperature: tempValue,
+                                systemPrompt:
+                                    promptController.text.trim().isEmpty
+                                    ? null
+                                    : promptController.text.trim(),
+                              );
+
+                              await _loadSessionAndHistory();
+                              widget.onChatUpdated?.call();
+
+                              if (mounted) {
+                                Navigator.pop(ctx);
+                              }
+                            }
+                          },
+                          child: const Text('Save'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
   // ---- message list ---------------------------------------------------------
 
   Widget _buildMessageList(BuildContext context) {
@@ -431,8 +749,11 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
                 shape: BoxShape.circle,
                 color: colors.primary.withOpacity(0.08),
               ),
-              child: Icon(Icons.chat_bubble_outline_rounded,
-                  size: 48, color: colors.primary.withOpacity(0.5)),
+              child: Icon(
+                Icons.chat_bubble_outline_rounded,
+                size: 48,
+                color: colors.primary.withOpacity(0.5),
+              ),
             ),
             const SizedBox(height: 20),
             Text(
@@ -489,33 +810,57 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
           Expanded(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 140),
-              child: TextField(
-                controller: _inputController,
-                focusNode: _inputFocus,
-                maxLines: null,
-                textInputAction: TextInputAction.newline,
-                decoration: InputDecoration(
-                  hintText: 'Type a message…',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
+              child: Focus(
+                onKeyEvent: (node, event) {
+                  if (_enterSendsMessage) {
+                    if (event is KeyDownEvent &&
+                        event.logicalKey == LogicalKeyboardKey.enter) {
+                      if (!HardwareKeyboard.instance.isShiftPressed) {
+                        if (!_isGenerating) {
+                          _sendMessage();
+                        }
+                        return KeyEventResult.handled;
+                      }
+                    }
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: TextField(
+                  controller: _inputController,
+                  focusNode: _inputFocus,
+                  maxLines: null,
+                  textInputAction: TextInputAction.newline,
+                  decoration: InputDecoration(
+                    hintText: 'Type a message…',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(
+                        color: colors.outlineVariant.withOpacity(0.15),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(
+                        color: colors.primary.withOpacity(0.5),
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 12,
+                    ),
+                    fillColor: colors.surfaceContainerLow,
+                    filled: true,
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide(
-                        color: colors.outlineVariant.withOpacity(0.15)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide:
-                        BorderSide(color: colors.primary.withOpacity(0.5)),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 18, vertical: 12),
-                  fillColor: colors.surfaceContainerLow,
-                  filled: true,
+                  onSubmitted: (_) {
+                    if (!_enterSendsMessage && !_isGenerating) {
+                      _sendMessage();
+                    }
+                  },
                 ),
-                onSubmitted: (_) => _sendMessage(),
               ),
             ),
           ),
@@ -531,12 +876,15 @@ class _ChatViewState extends State<ChatView> with TickerProviderStateMixin {
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
-                          strokeWidth: 2, color: colors.onPrimary),
+                        strokeWidth: 2,
+                        color: colors.onPrimary,
+                      ),
                     )
                   : const Icon(Icons.arrow_upward_rounded, size: 22),
               style: IconButton.styleFrom(
-                backgroundColor:
-                    _isGenerating ? colors.surfaceContainerHigh : null,
+                backgroundColor: _isGenerating
+                    ? colors.surfaceContainerHigh
+                    : null,
               ),
             ),
           ),
@@ -564,8 +912,9 @@ class _MessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Row(
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isUser
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[
@@ -573,8 +922,11 @@ class _MessageBubble extends StatelessWidget {
             CircleAvatar(
               radius: 16,
               backgroundColor: colors.primary.withOpacity(0.12),
-              child: Icon(Icons.auto_awesome_rounded,
-                  size: 16, color: colors.primary),
+              child: Icon(
+                Icons.auto_awesome_rounded,
+                size: 16,
+                color: colors.primary,
+              ),
             ),
             const SizedBox(width: 10),
           ],
@@ -583,9 +935,7 @@ class _MessageBubble extends StatelessWidget {
               constraints: BoxConstraints(maxWidth: maxBubbleWidth),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: isUser
-                    ? colors.primary
-                    : colors.surfaceContainerHigh,
+                color: isUser ? colors.primary : colors.surfaceContainerHigh,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(18),
                   topRight: const Radius.circular(18),
@@ -595,7 +945,8 @@ class _MessageBubble extends StatelessWidget {
                 border: isUser
                     ? null
                     : Border.all(
-                        color: colors.outlineVariant.withOpacity(0.12)),
+                        color: colors.outlineVariant.withOpacity(0.12),
+                      ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -606,7 +957,7 @@ class _MessageBubble extends StatelessWidget {
                   // timestamp
                   const SizedBox(height: 4),
                   Text(
-                     _formatTime(message.timestamp),
+                    _formatTime(message.timestamp),
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 11,
                       color: isUser
@@ -635,48 +986,57 @@ class _MessageBubble extends StatelessWidget {
       for (final match in codeBlockPattern.allMatches(content)) {
         // text before code
         if (match.start > lastEnd) {
-          parts.add(Text(
-            content.substring(lastEnd, match.start),
+          parts.add(
+            Text(
+              content.substring(lastEnd, match.start),
+              style: TextStyle(
+                color: isUser ? colors.onPrimary : colors.onSurface,
+                height: 1.5,
+              ),
+            ),
+          );
+        }
+        // code block
+        parts.add(
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.all(12),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: colors.outlineVariant.withOpacity(0.15),
+              ),
+            ),
+            child: SelectableText(
+              match.group(2)?.trim() ?? '',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 13,
+                color: colors.onSurface.withOpacity(0.85),
+                height: 1.5,
+              ),
+            ),
+          ),
+        );
+        lastEnd = match.end;
+      }
+      if (lastEnd < content.length) {
+        parts.add(
+          Text(
+            content.substring(lastEnd),
             style: TextStyle(
               color: isUser ? colors.onPrimary : colors.onSurface,
               height: 1.5,
             ),
-          ));
-        }
-        // code block
-        parts.add(Container(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          padding: const EdgeInsets.all(12),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: colors.surfaceContainerLowest,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-                color: colors.outlineVariant.withOpacity(0.15)),
           ),
-          child: SelectableText(
-            match.group(2)?.trim() ?? '',
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 13,
-              color: colors.onSurface.withOpacity(0.85),
-              height: 1.5,
-            ),
-          ),
-        ));
-        lastEnd = match.end;
-      }
-      if (lastEnd < content.length) {
-        parts.add(Text(
-          content.substring(lastEnd),
-          style: TextStyle(
-            color: isUser ? colors.onPrimary : colors.onSurface,
-            height: 1.5,
-          ),
-        ));
+        );
       }
       return Column(
-          crossAxisAlignment: CrossAxisAlignment.start, children: parts);
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: parts,
+      );
     }
 
     return SelectableText(
@@ -719,11 +1079,13 @@ class _AttachmentChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.description_rounded,
-              size: 16,
-              color: isUser
-                  ? colors.onPrimary.withOpacity(0.7)
-                  : colors.onSurface.withOpacity(0.5)),
+          Icon(
+            Icons.description_rounded,
+            size: 16,
+            color: isUser
+                ? colors.onPrimary.withOpacity(0.7)
+                : colors.onSurface.withOpacity(0.5),
+          ),
           const SizedBox(width: 6),
           Flexible(
             child: Text(
@@ -762,8 +1124,11 @@ class _TypingIndicator extends StatelessWidget {
           CircleAvatar(
             radius: 16,
             backgroundColor: colors.primary.withOpacity(0.12),
-            child: Icon(Icons.auto_awesome_rounded,
-                size: 16, color: colors.primary),
+            child: Icon(
+              Icons.auto_awesome_rounded,
+              size: 16,
+              color: colors.primary,
+            ),
           ),
           const SizedBox(width: 10),
           Container(
@@ -777,7 +1142,8 @@ class _TypingIndicator extends StatelessWidget {
                 bottomRight: Radius.circular(18),
               ),
               border: Border.all(
-                  color: colors.outlineVariant.withOpacity(0.12)),
+                color: colors.outlineVariant.withOpacity(0.12),
+              ),
             ),
             child: AnimatedBuilder(
               animation: controller,
